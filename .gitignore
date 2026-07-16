@@ -1,0 +1,33 @@
+.DS_Store
+
+# LaTeX intermediate files
+*.acn
+*.acr
+*.alg
+*.aux
+*.bbl
+*.bcf
+*.blg
+*.fdb_latexmk
+*.fls
+*.glg
+*.glo
+*.gls
+*.idx
+*.ilg
+*.ind
+*.ist
+*.lof
+*.log
+*.lot
+*.nav
+*.out
+*.run.xml
+*.snm
+*.synctex.gz
+*.toc
+*.vrb
+
+# Files generated while converting EPS figures for pdfLaTeX
+*-eps-converted-to.pdf
+
