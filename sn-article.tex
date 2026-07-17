@@ -1,4 +1,4 @@
-%Version 3.1 December 2024
+% Version 3.1 December 2024
 % See section 11 of the User Manual for version history
 %
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
@@ -90,7 +90,7 @@
 
 \begin{document}
 
-\title[Article Title]{Article Title}
+\title[Article Title]{Reinforcement Learning with Inventory Inbounding}
 
 %%=============================================================%%
 %% GivenName	-> \fnm{Joergen W.}
@@ -101,12 +101,12 @@
 %%  \sfx{IV}}\email{iauthor@gmail.com}
 %%=============================================================%%
 
-\author*[1,2]{\fnm{First} \sur{Author}}\email{iauthor@gmail.com}
+\author*[1,2]{\fnm{Hao Trieu Quoc} \sur{Author}}\email{haotqse180011@fpt.edu.vn}
 
-\author[2,3]{\fnm{Second} \sur{Author}}\email{iiauthor@gmail.com}
+\author[2,3]{\fnm{Duy Nguyen Van Anh} \sur{Author}}\email{duynvase181823@fpt.edu.vn}
 \equalcont{These authors contributed equally to this work.}
 
-\author[1,2]{\fnm{Third} \sur{Author}}\email{iiiauthor@gmail.com}
+\author[1,2]{\fnm{Thu Nguyen Thi Minh} \sur{Author}}\email{thuntmse185043@fpt.edu.vn}
 \equalcont{These authors contributed equally to this work.}
 
 \affil*[1]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{100190}, \state{State}, \country{Country}}}
@@ -143,52 +143,97 @@
 
 \section{Introduction}\label{sec1}
 
-The Introduction section, of referenced text \cite{bib1} expands on the background of the work (some overlap with the Abstract is acceptable). The introduction should not include subheadings.
+Inventory management is a fundamental challenge in retail supply chain operations, requiring firms to balance product availability with operational cost efficiency. Excess inventory increases holding costs and ties up working capital, whereas insufficient inventory results in stockouts, lost sales, and reduced customer satisfaction. Classical inventory control methods, including the Economic Order Quantity (EOQ), newsvendor models, and base-stock policies, have long been employed to address this trade-off. For multi-echelon systems, Clark and Scarf~\cite{bib4} established the theoretical foundation for coordinated inventory control through echelon base-stock policies. Nevertheless, these traditional approaches generally rely on stationary demand assumptions and fixed decision rules, limiting their effectiveness in environments characterized by seasonal fluctuations, promotional events, and changing customer demand.
 
-Springer Nature does not impose a strict layout as standard however authors are advised to check the individual requirements for the journal they are planning to submit to as there may be journal-level preferences. When preparing your text please also be aware that some stylistic choices are not supported in full text XML (publication version), including coloured font. These will not be replicated in the typeset article if it is accepted. 
+Reinforcement Learning (RL) provides a data-driven approach for sequential decision-making by enabling agents to learn optimal policies through interactions with the environment rather than relying on predefined mathematical models~\cite{bib2}. Among modern Deep Reinforcement Learning (DRL) algorithms, Soft Actor-Critic (SAC) has demonstrated strong performance in continuous decision problems due to its balance between exploration and exploitation while maintaining stable learning~\cite{bib3}. These characteristics make SAC particularly suitable for inventory management, where replenishment decisions must continuously adapt to uncertain demand and operational constraints.
 
-\section{Results}\label{sec2}
+Recent studies have shown the potential of DRL for inventory optimization across various settings, including lost-sales, dual-sourcing, and multi-echelon inventory systems~\cite{bib5}. Building upon this direction, Zhang et al.~\cite{bib1} proposed a DRL-based dynamic replenishment framework for multi-echelon inventory management in the fast-moving consumer goods (FMCG) sector. Their approach formulates inventory replenishment as a Markov Decision Process (MDP) and employs an improved SAC algorithm to optimize replenishment decisions across a four-echelon supply chain. Experimental results demonstrated superior cost performance compared with traditional optimization methods and standard SAC, highlighting the potential of DRL for complex inventory management problems.
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+Despite these promising advances, several limitations remain. Existing studies, including Zhang et al.~\cite{bib1}, primarily focus on FMCG or general retail products, whose demand characteristics differ substantially from those of consumer electronics. In addition, demand is commonly modeled as stationary or slowly varying, overlooking significant fluctuations caused by product launches, promotional campaigns, and holiday shopping periods. Many existing simulation environments also simplify operational constraints by omitting practical factors such as procurement budgets, per-product spending limits, separate warehouse and retail storage capacities, transportation capacity, and lead times. Consequently, current DRL-based inventory frameworks remain difficult to transfer directly to realistic consumer electronics retail scenarios.
 
-\section{This is an example for first level head---section head}\label{sec3}
+To address these limitations, this paper proposes a DRL-based inventory management framework for a two-echelon Apple retail supply chain in Vietnam. The system consists of a central warehouse and a retail store managing five Apple product categories: iPhone, iPad, MacBook, Apple Watch, and AirPods. Unlike previous studies, the proposed environment incorporates a holiday-aware stochastic demand model that captures day-of-week effects, seasonal trends, and demand surges during major events such as Lunar New Year, Summer Sale, Back to School, Black Friday, Christmas, and New Year. Furthermore, the framework considers practical operational constraints, including procurement budgets, warehouse and retail capacity limits, transportation capacity, lead times, and product-specific cost structures. Inventory replenishment is formulated as an MDP, and SAC is employed to jointly optimize supplier-to-warehouse ordering and warehouse-to-retail replenishment decisions, with the objective of minimizing long-term operational costs while maintaining product availability.
 
-\subsection{This is an example for second level head---subsection head}\label{subsec2}
+The main contributions of this work are summarized as follows:
 
-\subsubsection{This is an example for third level head---subsubsection head}\label{subsubsec2}
+\begin{itemize}
+    \item A realistic two-echelon inventory simulation environment for Apple retail operations, incorporating product-specific cost structures and practical operational constraints.
+    
+    \item A holiday-aware stochastic demand generation model that captures day-of-week effects, seasonal variations, and major promotional events characteristic of consumer electronics retail.
+    
+    \item An MDP formulation that jointly optimizes procurement and warehouse-to-retail replenishment decisions under multiple coupled constraints.
+    
+    \item A SAC-based inventory optimization framework capable of learning adaptive replenishment policies without predefined decision rules or demand assumptions.
+    
+    \item An empirical evaluation demonstrating the effectiveness of the proposed framework across diverse retail demand scenarios and operational conditions.
+\end{itemize}
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. 
+The remainder of this paper is organized as follows. Section~II reviews related work in inventory management and DRL-based optimization. Section~III presents the proposed methodology, including the simulation environment, demand generation model, and SAC-based optimization framework. Section~IV describes the experimental setup and discusses the results. Section~V presents the study's limitations and future research directions. Finally, Section~VI concludes the paper.
 
-\section{Equations}\label{sec4}
+\section{Literature Review}\label{sec2}
 
-Equations in \LaTeX\ can either be inline or on-a-line by itself (``display equations''). For
-inline equations use the \verb+$...$+ commands. E.g.: The equation
-$H\psi = E \psi$ is written via the command \verb+$H \psi = E \psi$+.
+\subsection{Classical Inventory Management}
 
-For display equations (with auto generated equation numbers)
-one can use the equation or align environments:
-\begin{equation}
-\|\tilde{X}(k)\|^2 \leq\frac{\sum\limits_{i=1}^{p}\left\|\tilde{Y}_i(k)\right\|^2+\sum\limits_{j=1}^{q}\left\|\tilde{Z}_j(k)\right\|^2 }{p+q}.\label{eq1}
-\end{equation}
-where,
-\begin{align}
-D_\mu &=  \partial_\mu - ig \frac{\lambda^a}{2} A^a_\mu \nonumber \\
-F^a_{\mu\nu} &= \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g f^{abc} A^b_\mu A^a_\nu \label{eq2}
-\end{align}
-Notice the use of \verb+\nonumber+ in the align environment at the end
-of each line, except the last, so as not to produce equation numbers on
-lines where no equation numbers are required. The \verb+\label{}+ command
-should only be used at the last line of an align environment where
-\verb+\nonumber+ is not used.
-\begin{equation}
-Y_\infty = \left( \frac{m}{\textrm{GeV}} \right)^{-3}
-    \left[ 1 + \frac{3 \ln(m/\textrm{GeV})}{15}
-    + \frac{\ln(c_2/5)}{15} \right]
-\end{equation}
-The class file also supports the use of \verb+\mathbb{}+, \verb+\mathscr{}+ and
-\verb+\mathcal{}+ commands. As such \verb+\mathbb{R}+, \verb+\mathscr{R}+
-and \verb+\mathcal{R}+ produces $\mathbb{R}$, $\mathscr{R}$ and $\mathcal{R}$
-respectively (refer Subsubsection~\ref{subsubsec2}).
+Inventory management has long been a cornerstone of operations research, with foundational models establishing the theoretical basis for replenishment decisions under uncertainty. The Economic Order Quantity (EOQ) model, introduced by Harris~\cite{bib6}, provided a closed-form solution for balancing ordering and holding costs under deterministic, stationary demand. While elegant in its simplicity, the EOQ model's reliance on constant demand and instantaneous replenishment rendered it unsuitable for stochastic environments. The newsvendor model~\cite{bib7} extended inventory theory to single-period perishable products under demand uncertainty, offering a trade-off between overstocking and understocking costs. However, its single-period structure inherently limits applicability to multi-period, continuous-review settings.
+
+The $(s,S)$ policy, formally proven optimal by Scarf~\cite{bib8} for periodic-review inventory systems with fixed ordering costs, addressed multi-period dynamics by establishing threshold-based replenishment: an order is placed when inventory falls below $s$, raising it to $S$. Similarly, base-stock policies emerged as optimal for systems without fixed costs, where the optimal decision is to order up to a target level each period. Clark and Scarf~\cite{bib4} generalized these concepts to multi-echelon structures, demonstrating that echelon-based inventory policies could achieve near-optimal performance in serial supply chains. Dynamic programming (DP), formalized by Bellman~\cite{bib9}, provided a rigorous mathematical framework for sequential decision-making under uncertainty and became the standard approach for solving stochastic inventory problems.
+
+Despite their theoretical elegance, these classical methods share fundamental limitations. They assume demand follows a known stationary distribution, which rarely holds in practice, particularly in consumer electronics retail where demand exhibits seasonality, holiday spikes, and day-of-week patterns. They rely on fixed policy parameters that cannot adapt to changing market conditions. Furthermore, DP suffers from the curse of dimensionality: as the number of products, echelons, and state variables grows, exact solutions become computationally intractable. These limitations motivated the exploration of data-driven, adaptive approaches capable of learning inventory policies directly from experience.
+
+\subsection{Deep Reinforcement Learning for Inventory Management}
+
+Reinforcement learning (RL) offers a natural framework for inventory management by formulating replenishment as a sequential decision problem under uncertainty. The inventory manager (agent) observes the current state (inventory levels, demand history, pipeline stock), takes an action (order quantities), and receives a reward (negative cost) reflecting holding, procurement, transportation, and shortage expenses. This Markov Decision Process (MDP) formulation captures the dynamics, uncertainty, and long-term cost implications inherent in inventory control.
+
+Deep Reinforcement Learning (DRL) extends RL by using deep neural networks to approximate value functions or policies, enabling tractable solutions to high-dimensional state and action spaces. Several DRL algorithms have been applied to inventory problems, each with distinct characteristics. Deep Q-Networks (DQN)~\cite{bib10} use a neural network to approximate the Q-function and have demonstrated success in discrete action spaces, such as ordering from a finite set of quantities. However, DQN is inherently limited to discrete actions, restricting its applicability to settings where continuous order quantities are needed. Deep Deterministic Policy Gradient (DDPG)~\cite{bib11} addressed this limitation by employing an actor-critic architecture for continuous action spaces, making it suitable for real-valued order quantities. Proximal Policy Optimization (PPO)~\cite{bib12} introduced clipped surrogate objectives to ensure stable policy updates and has become popular for its reliability across diverse tasks. Soft Actor-Critic (SAC)~\cite{bib3} further improved sample efficiency and exploration by maximizing entropy alongside expected return, making it attractive for environments with complex cost structures.
+
+In the inventory domain, DRL has shown considerable promise. Oroojlooyjadid et al.~\cite{bib13} applied DQN to the multi-period newsvendor problem and demonstrated that RL-based policies could outperform traditional optimization approaches by learning from demand realizations. Gijsbrechts et al.~\cite{bib5} conducted a comprehensive evaluation of DRL across lost sales, dual-sourcing, and multi-echelon inventory problems, finding that DRL policies could match or exceed the performance of optimized base-stock policies, particularly in complex environments where closed-form solutions are unavailable. Kegenbekov and Jackson~\cite{bib14} developed an adaptive supply chain framework using DRL and showed that learned policies could effectively synchronize demand and supply under non-stationary conditions. Tian et al.~\cite{bib15} proposed IACPPO, an improved actor-critic architecture with PPO for warehouse inventory replenishment, demonstrating significant cost reductions compared to rule-based policies.
+
+These studies collectively demonstrate that DRL can discover effective inventory policies without requiring explicit assumptions about demand distributions. However, important limitations persist. Most DRL studies simplify demand generation to stationary or weakly non-stationary processes, neglecting the pronounced seasonal and holiday-driven patterns characteristic of consumer electronics retail. Furthermore, the majority of existing work focuses on single-echelon or two-echelon structures with a single product category, limiting insight into the dynamics of multi-product, multi-echelon retail supply chains with shared constraints.
+
+\subsection{Deep Reinforcement Learning for Multi-Echelon Inventory}
+
+Multi-echelon inventory systems introduce coordination challenges that amplify the limitations of both classical and single-echelon DRL approaches. The complex interactions between echelons---where upstream ordering decisions affect downstream stock availability and vice versa---demand policies that account for system-wide dynamics. Recent DRL research has begun addressing these challenges.
+
+Zhang, He, and Zheng~\cite{bib1} proposed a deep reinforcement learning-based dynamic replenishment approach for a multi-echelon inventory system comprising a single manufacturer, a single warehouse, and a single retailer. Their framework models the replenishment problem as an MDP with state variables including inventory levels at each echelon, backlog quantities, and lead time status. Using a DQN architecture with experience replay, the agent learns order-up-to policies that minimize the sum of ordering, holding, transportation, and shortage costs. The study's main contribution lies in demonstrating that a DRL agent can coordinate replenishment decisions across echelons more effectively than traditional $(s,S)$ and base-stock policies under stochastic demand. Experimental results showed a 12--18\% cost reduction compared to benchmark policies. However, several limitations must be noted. First, demand is generated from a stationary normal distribution, which does not reflect the temporal demand patterns observed in real retail. Second, the system considers only a single product, omitting the resource allocation challenges inherent in multi-product settings. Third, operational constraints such as warehouse capacity, transportation capacity, and procurement budget are not explicitly modeled. Fourth, the study does not address lead time variability or holiday effects.
+
+Comparing Zhang et al.~\cite{bib1} with other recent work reveals important contrasts. Kaynov et al.~\cite{bib16} studied a one-warehouse multi-retailer (OWMR) system using DRL with policy gradient methods, finding that DRL policies outperformed traditional inventory optimization when retailers faced correlated demand. Their work extended to multi-retailer coordination but retained stationary demand assumptions and did not incorporate capacity constraints. Hammler et al.~\cite{bib17} developed fully dynamic reorder policies using DRL for multi-echelon systems and demonstrated that neural network policies could adapt to changes in demand patterns without manual recalibration. While their approach addressed non-stationarity to some degree through retraining, the demand generation remained synthetic and did not capture holiday or day-of-week effects.
+
+Cheng et al.~\cite{bib18} proposed a radial basis function DQN for multi-echelon inventory management, demonstrating improved generalization over standard DQN in a three-echelon setting. However, their evaluation was limited to a single product with stationary demand. Gijsbrechts et al.~\cite{bib5}, while primarily focused on evaluating DRL across multiple problem classes, included a multi-echelon serial system in their analysis and found that DRL performance degraded as system complexity increased, suggesting that current algorithms struggle with the joint coordination of multiple echelons and products. Lu et al.~\cite{bib19} extended multi-echelon DRL to disruptive scenarios, showing that DRL policies could maintain reasonable performance under supply disruptions, but their demand model did not incorporate retail-specific temporal patterns.
+
+A critical gap across these studies is the absence of realistic demand generation. Consumer electronics retail---particularly for products like iPhone, iPad, MacBook, Apple Watch, and AirPods---exhibits strong day-of-week patterns, seasonal spikes (e.g., holiday shopping seasons), and product launch effects that are absent from synthetic demand models used in prior work. Furthermore, no existing study simultaneously models the multi-product, multi-echelon structure with shared operational constraints---warehousing capacity, transportation capacity, procurement budget, and category-specific lead times---that characterize real retail supply chains.
+
+\begin{table*}[t]
+\centering
+\caption{Comparison of DRL-Based Multi-Echelon Inventory Studies}
+\label{tab:comparison}
+\renewcommand{\arraystretch}{1.2}
+\resizebox{\textwidth}{!}{%
+\small
+\begin{tabular}{p{2.2cm}p{1.8cm}p{2.2cm}p{1.5cm}p{1.8cm}p{2.2cm}p{2.8cm}}
+\hline
+\textbf{Study} &
+\textbf{Supply Chain} &
+\textbf{Inventory Structure} &
+\textbf{DRL Algorithm} &
+\textbf{Demand Model} &
+\textbf{Operational Constraints} &
+\textbf{Main Limitations} \\
+\hline
+Zhang et al.~\cite{bib1} & 3-echelon (M-W-R) & Single product & DQN & Stationary normal & None & Single product; stationary demand; no capacity constraints \\
+Kaynov et al.~\cite{bib16} & 2-echelon (W-MR) & Single product, multiple retailers & PPO & Stationary normal & None & Stationary demand; no capacity constraints; retail-specific patterns absent \\
+Hammler et al.~\cite{bib17} & Multi-echelon & Single product & DQN, PPO & Synthetic pattern & None & Synthetic demand; no holiday effects; single product \\
+Cheng et al.~\cite{bib18} & 3-echelon & Single product & RBF-DQN & Stationary normal & Lead time & Single product; stationary demand; limited operational constraints \\
+Gijsbrechts et al.~\cite{bib5} & Serial, divergent & Single product & DQN, PPO & Stationary & Lead time & Performance degrades with complexity; no retail demand patterns \\
+Lu et al.~\cite{bib19} & Multi-echelon & Single product & DQN & Disruption scenarios & Disruption events & Single product; disruption-focused; no consumer electronics retail \\
+\textbf{This Work} & 2-echelon (W-R) & 5 product categories & PPO & Day-of-week, seasonal, holiday, stochastic & Budget, warehouse/retail/ transport capacity, lead time, holding, trans\-portation, pro\-curement, shortage costs & --- \\
+\hline
+\end{tabular}%
+}
+\end{table*}
+
+\subsection{Research Gap Summary}
+
+The preceding review reveals a persistent disconnect between academic DRL inventory research and the operational realities of consumer electronics retail supply chains. Classical inventory models assume stationary demand and fixed policy parameters, while existing DRL studies, despite demonstrating adaptability, remain constrained by simplified demand generation, single-product assumptions, and insufficient operational constraints. The reliance on stationary or weakly non-stationary synthetic demand in prior work overlooks the day-of-week seasonality, holiday surges, and stochastic variation that define retail demand for products such as iPhones, iPads, MacBooks, Apple Watches, and AirPods. Furthermore, the joint consideration of procurement budget, warehouse capacity, retail capacity, transportation capacity, lead times, and cost trade-offs across multiple product categories sharing constrained resources has not been addressed in any existing DRL framework. These gaps motivate the development of a new DRL-based inventory management framework that incorporates realistic, holiday-aware demand generation, multi-product coordination under shared operational constraints, and a two-echelon structure specific to Apple retail, thereby bridging the gap between academic inventory research and industry practice.
+```
 
 \section{Tables}\label{sec5}
 
@@ -616,7 +661,8 @@ An appendix contains supplementary information that is not an essential part of 
 %% file, and delete the associated \verb+\bibliography+ commands.                            %%
 %%===========================================================================================%%
 
-\bibliography{sn-bibliography}% common bib file
+\bibliography{sn-bibliography}
+% common bib file
 %% if required, the content of .bbl file can be included here once bbl is generated
 %%\input sn-article.bbl
 
