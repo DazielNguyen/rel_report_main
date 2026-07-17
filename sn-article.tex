@@ -11,41 +11,40 @@
 %%                                                                 %%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-%%\documentclass[referee,sn-basic]{sn-jnl}% referee option is meant for double line spacing
+% ============================================================================
+% EDIT LOG (for author review before submission)
+%
+% Everything marked "% [AI-EDITED ...]" below was written or rewritten by an
+% AI assistant on 2026-07-17, grounded in the verified implementation
+% (env/weekly_retail_env.py, agent/q_learning.py, agent/sarsa.py,
+% agent/sac_alphalr.py, dashboard/backend/rollout.py) and in paper_v1.md.
+% Please review each marked block before submission.
+%
+% Key structural change from the previous draft: the Introduction and
+% Literature Review previously described a TWO-ECHELON (warehouse + retail)
+% system optimized with PPO. The code that actually runs
+% (env/weekly_retail_env.py) is SINGLE-ECHELON (retail floor only, no
+% intermediate warehouse, zero lead time) and compares FOUR policies
+% (Random, Q-learning, SARSA, SAC with adaptive temperature -- no PPO). Per
+% author instruction, the Introduction, Literature Review, and comparison
+% table were rewritten to match the single-echelon, four-policy system so
+% the whole paper is internally consistent with the running code.
+%
+% Sections removed entirely (Springer template boilerplate/demo content,
+% not applicable to this paper): the demo "Equations", "Tables", "Figures",
+% "Algorithms/Program codes and Listings" (verbatim Pascal/exponentiation
+% examples), "Cross referencing", and "Theorem-like environments" sections,
+% plus their unused preamble packages/environments (listings, unused
+% amsthm theorem styles). A single real \begin{algorithm} block for the
+% Q-learning/SARSA update rule was kept/rewritten with real content.
+% ============================================================================
 
-%%=======================================================%%
-%% to print line numbers in the margin use lineno option %%
-%%=======================================================%%
-
-%%\documentclass[lineno,pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
-
-%%=========================================================================================%%
-%% the documentclass is set to pdflatex as default. You can delete it if not appropriate.  %%
-%%=========================================================================================%%
-
-%%\documentclass[sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
-
-%%Note: the following reference styles support Namedate and Numbered referencing. By default the style follows the most common style. To switch between the options you can add or remove �Numbered� in the optional parenthesis. 
-%%The option is available for: sn-basic.bst, sn-chicago.bst%  
- 
-%%\documentclass[pdflatex,sn-nature]{sn-jnl}% Style for submissions to Nature Portfolio journals
-%%\documentclass[pdflatex,sn-basic]{sn-jnl}% Basic Springer Nature Reference Style/Chemistry Reference Style
 \documentclass[pdflatex,sn-mathphys-num]{sn-jnl}% Math and Physical Sciences Numbered Reference Style
-%%\documentclass[pdflatex,sn-mathphys-ay]{sn-jnl}% Math and Physical Sciences Author Year Reference Style
-%%\documentclass[pdflatex,sn-aps]{sn-jnl}% American Physical Society (APS) Reference Style
-%%\documentclass[pdflatex,sn-vancouver-num]{sn-jnl}% Vancouver Numbered Reference Style
-%%\documentclass[pdflatex,sn-vancouver-ay]{sn-jnl}% Vancouver Author Year Reference Style
-%%\documentclass[pdflatex,sn-apa]{sn-jnl}% APA Reference Style
-%%\documentclass[pdflatex,sn-chicago]{sn-jnl}% Chicago-based Humanities Reference Style
 
 %%%% Standard Packages
-%%<additional latex packages if required can be included here>
-
 \usepackage{graphicx}%
 \usepackage{multirow}%
 \usepackage{amsmath,amssymb,amsfonts}%
-\usepackage{amsthm}%
-\usepackage{mathrsfs}%
 \usepackage[title]{appendix}%
 \usepackage{xcolor}%
 \usepackage{textcomp}%
@@ -54,120 +53,85 @@
 \usepackage{algorithm}%
 \usepackage{algorithmicx}%
 \usepackage{algpseudocode}%
-\usepackage{listings}%
 %%%%
 
-%%%%%=============================================================================%%%%
-%%%%  Remarks: This template is provided to aid authors with the preparation
-%%%%  of original research articles intended for submission to journals published 
-%%%%  by Springer Nature. The guidance has been prepared in partnership with 
-%%%%  production teams to conform to Springer Nature technical requirements. 
-%%%%  Editorial and presentation requirements differ among journal portfolios and 
-%%%%  research disciplines. You may find sections in this template are irrelevant 
-%%%%  to your work and are empowered to omit any such section if allowed by the 
-%%%%  journal you intend to submit to. The submission guidelines and policies 
-%%%%  of the journal take precedence. A detailed User Manual is available in the 
-%%%%  template package for technical guidance.
-%%%%%=============================================================================%%%%
-
-%% as per the requirement new theorem styles can be included as shown below
-\theoremstyle{thmstyleone}%
-\newtheorem{theorem}{Theorem}%  meant for continuous numbers
-%%\newtheorem{theorem}{Theorem}[section]% meant for sectionwise numbers
-%% optional argument [theorem] produces theorem numbering sequence instead of independent numbers for Proposition
-\newtheorem{proposition}[theorem]{Proposition}% 
-%%\newtheorem{proposition}{Proposition}% to get separate numbers for theorem and proposition etc.
-
-\theoremstyle{thmstyletwo}%
-\newtheorem{example}{Example}%
-\newtheorem{remark}{Remark}%
-
-\theoremstyle{thmstylethree}%
-\newtheorem{definition}{Definition}%
+% [AI-EDITED 2026-07-17] The sn-jnl class ships with a narrow "smallcond"
+% text block (131mm wide on an A4 page) and a large reserved footskip,
+% which leaves wide empty side margins and a big gap below the text before
+% the footer. Overriding geometry here switches to standard A4 print
+% margins with a normal-width text block.
+\usepackage{geometry}%
+\geometry{
+    a4paper,
+    top=25mm,
+    bottom=25mm,
+    left=25mm,
+    right=25mm,
+    headheight=14pt,
+    headsep=10mm,
+    footskip=15mm
+}%
 
 \raggedbottom
-%%\unnumbered% uncomment this for unnumbered level heads
 
 \begin{document}
 
-\title[Article Title]{Reinforcement Learning with Inventory Inbounding}
+\title[RL for Weekly Retail Inventory Replenishment]{Reinforcement Learning for Weekly Retail Inventory Replenishment: A Comparison of Tabular and Deep Actor-Critic Methods}
+% [AI-EDITED] Title updated to match the single-echelon, four-policy study
+% actually implemented and evaluated (was "Reinforcement Learning with
+% Inventory Inbounding"). Please confirm this is the title you want to
+% submit under.
 
-%%=============================================================%%
-%% GivenName	-> \fnm{Joergen W.}
-%% Particle	-> \spfx{van der} -> surname prefix
-%% FamilyName	-> \sur{Ploeg}
-%% Suffix	-> \sfx{IV}
-%% \author*[1,2]{\fnm{Joergen W.} \spfx{van der} \sur{Ploeg} 
-%%  \sfx{IV}}\email{iauthor@gmail.com}
-%%=============================================================%%
+\author*[1]{\fnm{Hao Trieu Quoc} \sur{Author}}\email{haotqse180011@fpt.edu.vn}
 
-\author*[1,2]{\fnm{Hao Trieu Quoc} \sur{Author}}\email{haotqse180011@fpt.edu.vn}
-
-\author[2,3]{\fnm{Duy Nguyen Van Anh} \sur{Author}}\email{duynvase181823@fpt.edu.vn}
+\author[1]{\fnm{Duy Nguyen Van Anh} \sur{Author}}\email{duynvase181823@fpt.edu.vn}
 \equalcont{These authors contributed equally to this work.}
 
-\author[1,2]{\fnm{Thu Nguyen Thi Minh} \sur{Author}}\email{thuntmse185043@fpt.edu.vn}
+\author[1]{\fnm{Thu Nguyen Thi Minh} \sur{Author}}\email{thuntmse185043@fpt.edu.vn}
 \equalcont{These authors contributed equally to this work.}
 
-\affil*[1]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{100190}, \state{State}, \country{Country}}}
+\affil*[1]{\orgdiv{Department of Artificial Intelligence}, \orgname{FPT University}, \orgaddress{\street{7 D1 Street, Tang Nhon Phu}, \city{Ho Chi Minh City}, \postcode{700000}, \country{Vietnam}}}
 
-\affil[2]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{10587}, \state{State}, \country{Country}}}
+% [AI-EDITED] Abstract rewritten from placeholder text to match paper_v1.md.
+\abstract{Retail inventory replenishment is a sequential decision problem in which a store manager must decide, week by week, how many units of each product to order from a distributor, trading off procurement cost, storage cost, and stockout cost under a hard physical constraint on retail floor space. This paper formulates the problem as a Markov Decision Process (MDP) for a five-category Apple retail store (iPhone, iPad, MacBook, Apple Watch, AirPods) and compares four ordering policies: a uniform random baseline, tabular Q-learning, tabular SARSA, and a Soft Actor-Critic variant with adaptive entropy temperature, denoted SAC-AlphaLR. All four policies are evaluated on the same simulated 52-week horizon under a demand generator with day-of-week effects, seasonal variation, and seven recurring holiday demand spikes calibrated to the Vietnamese retail calendar. Under the evaluated cost and demand configuration, SAC-AlphaLR achieves the lowest total annual cost (167.35 billion VND versus 182.64 billion VND for the random baseline, an 8.4\% reduction) and the fewest stockout units (2{,}709 versus 5{,}022, a 46\% reduction), while all four policies operate at a net loss under the store's current price and shortage-penalty configuration. This last finding is reported as an explicit limitation, since it materially affects how the comparative results should be interpreted.}
 
-\affil[3]{\orgdiv{Department}, \orgname{Organization}, \orgaddress{\street{Street}, \city{City}, \postcode{610101}, \state{State}, \country{Country}}}
-
-%%==================================%%
-%% Sample for unstructured abstract %%
-%%==================================%%
-
-\abstract{The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. Authors are advised to check the author instructions for the journal they are submitting to for word limits and if structural elements like subheadings, citations, or equations are permitted.}
-
-%%================================%%
-%% Sample for structured abstract %%
-%%================================%%
-
-% \abstract{\textbf{Purpose:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
-% 
-% \textbf{Methods:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
-% 
-% \textbf{Results:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.
-% 
-% \textbf{Conclusion:} The abstract serves both as a general introduction to the topic and as a brief, non-technical summary of the main results and their implications. The abstract must not include subheadings (unless expressly permitted in the journal's Instructions to Authors), equations or citations. As a guide the abstract should not exceed 200 words. Most journals do not set a hard limit however authors are advised to check the author instructions for the journal they are submitting to.}
-
-\keywords{keyword1, Keyword2, Keyword3, Keyword4}
-
-%%\pacs[JEL Classification]{D8, H51}
-
-%%\pacs[MSC Classification]{35A01, 65L10, 65L12, 65L20, 65L70}
+\keywords{Reinforcement Learning, Inventory Management, Retail Replenishment, Soft Actor-Critic, Q-learning, SARSA, Markov Decision Process}
+% [AI-EDITED] Keywords filled in (was "keyword1, Keyword2, Keyword3, Keyword4").
 
 \maketitle
 
 \section{Introduction}\label{sec1}
+% [AI-EDITED] Rewritten to describe the single-echelon, floor-space-constrained
+% retail system with four compared policies, replacing the previous
+% two-echelon / PPO framing.
 
-Inventory management is a fundamental challenge in retail supply chain operations, requiring firms to balance product availability with operational cost efficiency. Excess inventory increases holding costs and ties up working capital, whereas insufficient inventory results in stockouts, lost sales, and reduced customer satisfaction. Classical inventory control methods, including the Economic Order Quantity (EOQ), newsvendor models, and base-stock policies, have long been employed to address this trade-off. For multi-echelon systems, Clark and Scarf~\cite{bib4} established the theoretical foundation for coordinated inventory control through echelon base-stock policies. Nevertheless, these traditional approaches generally rely on stationary demand assumptions and fixed decision rules, limiting their effectiveness in environments characterized by seasonal fluctuations, promotional events, and changing customer demand.
+Inventory management is a fundamental challenge in retail operations, requiring firms to balance product availability against operational cost efficiency. Excess inventory increases holding costs and ties up working capital, whereas insufficient inventory results in stockouts, lost sales, and reduced customer satisfaction. Classical inventory control methods, including the Economic Order Quantity (EOQ) model~\cite{bib6}, the newsvendor model~\cite{bib7}, and $(s,S)$ policies~\cite{bib8}, have long been used to address this trade-off, and Clark and Scarf~\cite{bib4} extended these ideas to coordinated multi-echelon control through echelon base-stock policies. These classical approaches generally rely on stationary demand assumptions and fixed decision rules, which limits their effectiveness in environments with seasonal fluctuations, promotional events, and a hard physical constraint on how much stock a store can actually hold.
 
-Reinforcement Learning (RL) provides a data-driven approach for sequential decision-making by enabling agents to learn optimal policies through interactions with the environment rather than relying on predefined mathematical models~\cite{bib2}. Among modern Deep Reinforcement Learning (DRL) algorithms, Soft Actor-Critic (SAC) has demonstrated strong performance in continuous decision problems due to its balance between exploration and exploitation while maintaining stable learning~\cite{bib3}. These characteristics make SAC particularly suitable for inventory management, where replenishment decisions must continuously adapt to uncertain demand and operational constraints.
+Reinforcement Learning (RL) offers a data-driven alternative for sequential decision-making, letting an agent learn a replenishment policy through interaction with a simulated environment rather than relying on a predefined mathematical model~\cite{bib2}. Tabular methods such as Q-learning~\cite{bib20} and SARSA~\cite{bib21} learn action-value estimates directly over a discretized state space and remain attractive for their simplicity and interpretability. Deep Reinforcement Learning (DRL) extends this idea with function approximation: among modern DRL algorithms, Soft Actor-Critic (SAC)~\cite{bib3} and its adaptive-temperature variant~\cite{bib23} have demonstrated strong performance in continuous control problems by maximizing a trade-off between expected return and policy entropy, which makes SAC well suited to a continuous order-quantity action space.
 
-Recent studies have shown the potential of DRL for inventory optimization across various settings, including lost-sales, dual-sourcing, and multi-echelon inventory systems~\cite{bib5}. Building upon this direction, Zhang et al.~\cite{bib1} proposed a DRL-based dynamic replenishment framework for multi-echelon inventory management in the fast-moving consumer goods (FMCG) sector. Their approach formulates inventory replenishment as a Markov Decision Process (MDP) and employs an improved SAC algorithm to optimize replenishment decisions across a four-echelon supply chain. Experimental results demonstrated superior cost performance compared with traditional optimization methods and standard SAC, highlighting the potential of DRL for complex inventory management problems.
+Recent studies have shown the potential of DRL for inventory optimization across lost-sales, dual-sourcing, and multi-echelon settings~\cite{bib5}. Zhang, He, and Zheng~\cite{bib1} proposed a DRL-based dynamic replenishment framework for a multi-echelon FMCG (fast-moving consumer goods) supply chain, formulating replenishment as an MDP and using an improved SAC variant, adopted in this paper as the SAC-AlphaLR policy (Section~\ref{subsec:sac}), to coordinate a manufacturer-warehouse-retailer chain, with reported cost improvements over overstocking, particle swarm optimization, and standard SAC baselines. Comparable studies~\cite{bib16,bib17,bib18,bib19} similarly target multi-echelon coordination, generally under a single product and a stationary or synthetic demand process.
 
-Despite these promising advances, several limitations remain. Existing studies, including Zhang et al.~\cite{bib1}, primarily focus on FMCG or general retail products, whose demand characteristics differ substantially from those of consumer electronics. In addition, demand is commonly modeled as stationary or slowly varying, overlooking significant fluctuations caused by product launches, promotional campaigns, and holiday shopping periods. Many existing simulation environments also simplify operational constraints by omitting practical factors such as procurement budgets, per-product spending limits, separate warehouse and retail storage capacities, transportation capacity, and lead times. Consequently, current DRL-based inventory frameworks remain difficult to transfer directly to realistic consumer electronics retail scenarios.
+Despite this progress, two gaps remain relevant to specialty electronics retail. First, most existing DRL inventory studies assume either a single product or a stationary demand process, which does not reflect the pronounced day-of-week, seasonal, and holiday-driven demand swings observed in consumer electronics retail. Second, and more specifically, prior work on constrained inventory systems typically models capacity as an echelon-level warehouse limit rather than as a single, shared retail floor-space budget (measured in square meters) across several product categories with different per-unit footprints; this latter constraint does not decompose into independent per-product problems, since ordering more of one product directly reduces the floor budget available to the others. Third, few studies benchmark a spectrum of RL algorithms, from simple tabular methods to deep actor-critic methods, on the same environment and evaluation protocol, which makes it difficult to judge how much of a deep method's advantage is attributable to the algorithm itself versus differences in experimental setup.
 
-To address these limitations, this paper proposes a DRL-based inventory management framework for a two-echelon Apple retail supply chain in Vietnam. The system consists of a central warehouse and a retail store managing five Apple product categories: iPhone, iPad, MacBook, Apple Watch, and AirPods. Unlike previous studies, the proposed environment incorporates a holiday-aware stochastic demand model that captures day-of-week effects, seasonal trends, and demand surges during major events such as Lunar New Year, Summer Sale, Back to School, Black Friday, Christmas, and New Year. Furthermore, the framework considers practical operational constraints, including procurement budgets, warehouse and retail capacity limits, transportation capacity, lead times, and product-specific cost structures. Inventory replenishment is formulated as an MDP, and SAC is employed to jointly optimize supplier-to-warehouse ordering and warehouse-to-retail replenishment decisions, with the objective of minimizing long-term operational costs while maintaining product availability.
+This paper addresses these gaps with a single-echelon inventory replenishment study for an Apple retail store in Vietnam managing five product categories (iPhone, iPad, MacBook, Apple Watch, AirPods). The store orders once per week from a distributor and receives stock immediately; the environment enforces a fixed retail floor-space budget of 25 square meters, shared across all five product categories according to their individual per-unit footprints, and a holiday-aware stochastic demand generator that captures day-of-week effects, seasonal variation, and seven recurring demand spikes (Lunar New Year, Summer Sale, Back to School, Mid-Autumn, Black Friday, Christmas, New Year). Replenishment is formulated as an MDP, and four ordering policies, a random baseline, tabular Q-learning, tabular SARSA, and a Soft Actor-Critic agent with adaptive temperature (SAC-AlphaLR), are trained and evaluated under an identical protocol.
 
 The main contributions of this work are summarized as follows:
 
 \begin{itemize}
-    \item A realistic two-echelon inventory simulation environment for Apple retail operations, incorporating product-specific cost structures and practical operational constraints.
-    
-    \item A holiday-aware stochastic demand generation model that captures day-of-week effects, seasonal variations, and major promotional events characteristic of consumer electronics retail.
-    
-    \item An MDP formulation that jointly optimizes procurement and warehouse-to-retail replenishment decisions under multiple coupled constraints.
-    
-    \item A SAC-based inventory optimization framework capable of learning adaptive replenishment policies without predefined decision rules or demand assumptions.
-    
-    \item An empirical evaluation demonstrating the effectiveness of the proposed framework across diverse retail demand scenarios and operational conditions.
+    \item A single-echelon retail inventory simulation environment constrained by a shared retail floor-space budget (in square meters) across five product categories with distinct per-unit footprints and cost structures.
+
+    \item A holiday-aware stochastic demand generation model that captures day-of-week effects, seasonal variation, and seven recurring promotional/holiday events characteristic of consumer electronics retail.
+
+    \item An MDP formulation of weekly retail replenishment under this shared floor-space constraint, with a 26-dimensional state and a 5-dimensional order-quantity action.
+
+    \item A controlled empirical comparison of four ordering policies, a random baseline, tabular Q-learning, tabular SARSA, and Soft Actor-Critic with adaptive temperature, trained and evaluated under an identical protocol on the same environment.
+
+    \item A configuration-sensitivity analysis that varies baseline demand and holiday intensity independently, demonstrating how the trained policy responds beyond the default Apple-retail scenario.
+
+    \item Transparent verification of all reported hyperparameters, cost structures, and results against the running implementation, with explicit documentation of the points where an earlier design draft of this project diverged from the final, tuned system.
 \end{itemize}
 
-The remainder of this paper is organized as follows. Section~II reviews related work in inventory management and DRL-based optimization. Section~III presents the proposed methodology, including the simulation environment, demand generation model, and SAC-based optimization framework. Section~IV describes the experimental setup and discusses the results. Section~V presents the study's limitations and future research directions. Finally, Section~VI concludes the paper.
+The remainder of this paper is organized as follows. Section~\ref{sec2} reviews related work in classical and RL-based inventory management. Section~\ref{sec3} presents the proposed methodology, including the environment, demand model, and the four ordering policies. Section~\ref{sec4} describes the experimental setup. Section~\ref{sec5} reports the results. Section~\ref{sec6} discusses the findings. Section~\ref{sec7} discusses limitations and future work. Section~\ref{sec8} concludes the paper.
 
 \section{Literature Review}\label{sec2}
 
@@ -177,535 +141,326 @@ Inventory management has long been a cornerstone of operations research, with fo
 
 The $(s,S)$ policy, formally proven optimal by Scarf~\cite{bib8} for periodic-review inventory systems with fixed ordering costs, addressed multi-period dynamics by establishing threshold-based replenishment: an order is placed when inventory falls below $s$, raising it to $S$. Similarly, base-stock policies emerged as optimal for systems without fixed costs, where the optimal decision is to order up to a target level each period. Clark and Scarf~\cite{bib4} generalized these concepts to multi-echelon structures, demonstrating that echelon-based inventory policies could achieve near-optimal performance in serial supply chains. Dynamic programming (DP), formalized by Bellman~\cite{bib9}, provided a rigorous mathematical framework for sequential decision-making under uncertainty and became the standard approach for solving stochastic inventory problems.
 
-Despite their theoretical elegance, these classical methods share fundamental limitations. They assume demand follows a known stationary distribution, which rarely holds in practice, particularly in consumer electronics retail where demand exhibits seasonality, holiday spikes, and day-of-week patterns. They rely on fixed policy parameters that cannot adapt to changing market conditions. Furthermore, DP suffers from the curse of dimensionality: as the number of products, echelons, and state variables grows, exact solutions become computationally intractable. These limitations motivated the exploration of data-driven, adaptive approaches capable of learning inventory policies directly from experience.
+Despite their theoretical elegance, these classical methods share fundamental limitations. They assume demand follows a known stationary distribution, which rarely holds in practice, particularly in consumer electronics retail where demand exhibits seasonality, holiday spikes, and day-of-week patterns. They rely on fixed policy parameters that cannot adapt to changing market conditions. Furthermore, DP suffers from the curse of dimensionality: as the number of products and state variables grows, exact solutions become computationally intractable. None of these classical formulations natively handles a single shared capacity constraint (such as retail floor space, expressed in square meters) across several products with different physical footprints, since doing so couples what would otherwise be independent single-product inventory problems. These limitations motivate data-driven, adaptive approaches capable of learning inventory policies directly from experience.
 
-\subsection{Deep Reinforcement Learning for Inventory Management}
+\subsection{Reinforcement Learning for Inventory Management}
 
-Reinforcement learning (RL) offers a natural framework for inventory management by formulating replenishment as a sequential decision problem under uncertainty. The inventory manager (agent) observes the current state (inventory levels, demand history, pipeline stock), takes an action (order quantities), and receives a reward (negative cost) reflecting holding, procurement, transportation, and shortage expenses. This Markov Decision Process (MDP) formulation captures the dynamics, uncertainty, and long-term cost implications inherent in inventory control.
+Reinforcement learning (RL) offers a natural framework for inventory management by formulating replenishment as a sequential decision problem under uncertainty. The inventory manager (agent) observes the current state (inventory levels, demand forecast, cost structure), takes an action (order quantities), and receives a reward (negative cost) reflecting procurement, holding, and shortage expenses. This MDP formulation captures the dynamics, uncertainty, and long-term cost implications inherent in inventory control.
 
-Deep Reinforcement Learning (DRL) extends RL by using deep neural networks to approximate value functions or policies, enabling tractable solutions to high-dimensional state and action spaces. Several DRL algorithms have been applied to inventory problems, each with distinct characteristics. Deep Q-Networks (DQN)~\cite{bib10} use a neural network to approximate the Q-function and have demonstrated success in discrete action spaces, such as ordering from a finite set of quantities. However, DQN is inherently limited to discrete actions, restricting its applicability to settings where continuous order quantities are needed. Deep Deterministic Policy Gradient (DDPG)~\cite{bib11} addressed this limitation by employing an actor-critic architecture for continuous action spaces, making it suitable for real-valued order quantities. Proximal Policy Optimization (PPO)~\cite{bib12} introduced clipped surrogate objectives to ensure stable policy updates and has become popular for its reliability across diverse tasks. Soft Actor-Critic (SAC)~\cite{bib3} further improved sample efficiency and exploration by maximizing entropy alongside expected return, making it attractive for environments with complex cost structures.
+Tabular RL methods learn action-value estimates over a discretized state space without function approximation. Q-learning~\cite{bib20} is an off-policy temporal-difference method that bootstraps toward the maximum action-value of the next state, while SARSA~\cite{bib21} is its on-policy counterpart, bootstrapping toward the value of the action actually selected next under the current exploration policy; Sutton and Barto~\cite{bib22} provide the standard treatment of both, including their convergence properties and the exploration-exploitation trade-off. Deep Reinforcement Learning (DRL) extends RL with neural function approximation, enabling tractable solutions in high-dimensional state and action spaces. Deep Q-Networks (DQN)~\cite{bib10} approximate the Q-function with a neural network and have demonstrated success in discrete action spaces, but are inherently limited to discrete actions. Deep Deterministic Policy Gradient (DDPG)~\cite{bib11} addressed this with an actor-critic architecture for continuous action spaces. Proximal Policy Optimization (PPO)~\cite{bib12} introduced clipped surrogate objectives for stable on-policy updates. Soft Actor-Critic (SAC)~\cite{bib3} further improved sample efficiency and exploration by maximizing entropy alongside expected return, and a follow-up formulation~\cite{bib23} replaced its fixed entropy-temperature hyperparameter with an automatically tuned value, which is the formulation adopted in this paper (Section~\ref{subsec:sac}).
 
-In the inventory domain, DRL has shown considerable promise. Oroojlooyjadid et al.~\cite{bib13} applied DQN to the multi-period newsvendor problem and demonstrated that RL-based policies could outperform traditional optimization approaches by learning from demand realizations. Gijsbrechts et al.~\cite{bib5} conducted a comprehensive evaluation of DRL across lost sales, dual-sourcing, and multi-echelon inventory problems, finding that DRL policies could match or exceed the performance of optimized base-stock policies, particularly in complex environments where closed-form solutions are unavailable. Kegenbekov and Jackson~\cite{bib14} developed an adaptive supply chain framework using DRL and showed that learned policies could effectively synchronize demand and supply under non-stationary conditions. Tian et al.~\cite{bib15} proposed IACPPO, an improved actor-critic architecture with PPO for warehouse inventory replenishment, demonstrating significant cost reductions compared to rule-based policies.
+In the inventory domain, DRL has shown considerable promise. Oroojlooyjadid et al.~\cite{bib13} applied DQN to the multi-period newsvendor problem and demonstrated that RL-based policies could outperform traditional optimization approaches by learning from demand realizations. Gijsbrechts et al.~\cite{bib5} conducted a comprehensive evaluation of DRL across lost-sales, dual-sourcing, and multi-echelon inventory problems, finding that DRL policies could match or exceed optimized base-stock policies, particularly in settings where closed-form solutions are unavailable, for example under lost-sales dynamics or capacity constraints that break the assumptions behind classical heuristics. Kegenbekov and Jackson~\cite{bib14} developed an adaptive supply chain framework using DRL and showed that learned policies could synchronize demand and supply under non-stationary conditions. Tian et al.~\cite{bib15} proposed an improved actor-critic architecture with PPO for warehouse inventory replenishment, demonstrating cost reductions relative to rule-based policies.
 
-These studies collectively demonstrate that DRL can discover effective inventory policies without requiring explicit assumptions about demand distributions. However, important limitations persist. Most DRL studies simplify demand generation to stationary or weakly non-stationary processes, neglecting the pronounced seasonal and holiday-driven patterns characteristic of consumer electronics retail. Furthermore, the majority of existing work focuses on single-echelon or two-echelon structures with a single product category, limiting insight into the dynamics of multi-product, multi-echelon retail supply chains with shared constraints.
+These studies collectively demonstrate that DRL can discover effective inventory policies without explicit assumptions about demand distributions. However, most simplify demand generation to stationary or weakly non-stationary processes, and few directly compare a spectrum of RL algorithms of differing complexity, from tabular to deep actor-critic, under an identical environment and evaluation protocol; this comparison is one of the goals of the present study.
 
-\subsection{Deep Reinforcement Learning for Multi-Echelon Inventory}
+\subsection{Deep Reinforcement Learning for Multi-Echelon and Constrained Inventory Systems}
 
-Multi-echelon inventory systems introduce coordination challenges that amplify the limitations of both classical and single-echelon DRL approaches. The complex interactions between echelons---where upstream ordering decisions affect downstream stock availability and vice versa---demand policies that account for system-wide dynamics. Recent DRL research has begun addressing these challenges.
+A separate line of DRL inventory research targets multi-echelon coordination, where the complex interaction between echelons, upstream ordering decisions affecting downstream availability and vice versa, demands policies that account for system-wide dynamics. Zhang, He, and Zheng~\cite{bib1} proposed a DRL-based dynamic replenishment approach (ME-DRFO) for a multi-echelon FMCG inventory system comprising a manufacturer, a warehouse, and a retailer, modeling the problem as an MDP and using an improved Soft Actor-Critic variant with adaptive temperature and adaptive learning rate, which they term SAC-AlphaLR, to learn replenishment policies. Their study reported a 12.31\% replenishment-cost reduction and a reduction in inventory shortages to 2.21\%, relative to overstocking, particle swarm optimization, and standard SAC baselines, but modeled a single product under stationary normal demand and did not represent a shared physical capacity constraint across products. \textbf{The SAC-AlphaLR name adopted for the deep actor-critic policy in this paper (Section~\ref{subsec:sac}) is taken directly from Zhang et al.~\cite{bib1}}; this paper implements the adaptive-temperature mechanism of~\cite{bib23} but, per the verified implementation, does not implement Zhang et al.'s adaptive-learning-rate mechanism (a fixed Adam learning rate of $3\times10^{-4}$ is used instead, Section~\ref{subsec:sac}). This naming choice and the resulting mismatch between the name and the implemented mechanism should be resolved by the authors before submission (Section~\ref{subsec:sac}). Kaynov et al.~\cite{bib16} studied a one-warehouse multi-retailer system with policy-gradient DRL under correlated demand across retailers but retained stationary demand and no capacity constraints. Hammler et al.~\cite{bib17} developed fully dynamic reorder policies for multi-echelon systems that adapted to demand pattern changes through retraining, though demand generation remained synthetic. Cheng et al.~\cite{bib18} proposed a radial basis function DQN for a three-echelon setting with a single product under stationary demand. Lu et al.~\cite{bib19} extended multi-echelon DRL to supply disruption scenarios without retail-specific temporal demand patterns.
 
-Zhang, He, and Zheng~\cite{bib1} proposed a deep reinforcement learning-based dynamic replenishment approach for a multi-echelon inventory system comprising a single manufacturer, a single warehouse, and a single retailer. Their framework models the replenishment problem as an MDP with state variables including inventory levels at each echelon, backlog quantities, and lead time status. Using a DQN architecture with experience replay, the agent learns order-up-to policies that minimize the sum of ordering, holding, transportation, and shortage costs. The study's main contribution lies in demonstrating that a DRL agent can coordinate replenishment decisions across echelons more effectively than traditional $(s,S)$ and base-stock policies under stochastic demand. Experimental results showed a 12--18\% cost reduction compared to benchmark policies. However, several limitations must be noted. First, demand is generated from a stationary normal distribution, which does not reflect the temporal demand patterns observed in real retail. Second, the system considers only a single product, omitting the resource allocation challenges inherent in multi-product settings. Third, operational constraints such as warehouse capacity, transportation capacity, and procurement budget are not explicitly modeled. Fourth, the study does not address lead time variability or holiday effects.
-
-Comparing Zhang et al.~\cite{bib1} with other recent work reveals important contrasts. Kaynov et al.~\cite{bib16} studied a one-warehouse multi-retailer (OWMR) system using DRL with policy gradient methods, finding that DRL policies outperformed traditional inventory optimization when retailers faced correlated demand. Their work extended to multi-retailer coordination but retained stationary demand assumptions and did not incorporate capacity constraints. Hammler et al.~\cite{bib17} developed fully dynamic reorder policies using DRL for multi-echelon systems and demonstrated that neural network policies could adapt to changes in demand patterns without manual recalibration. While their approach addressed non-stationarity to some degree through retraining, the demand generation remained synthetic and did not capture holiday or day-of-week effects.
-
-Cheng et al.~\cite{bib18} proposed a radial basis function DQN for multi-echelon inventory management, demonstrating improved generalization over standard DQN in a three-echelon setting. However, their evaluation was limited to a single product with stationary demand. Gijsbrechts et al.~\cite{bib5}, while primarily focused on evaluating DRL across multiple problem classes, included a multi-echelon serial system in their analysis and found that DRL performance degraded as system complexity increased, suggesting that current algorithms struggle with the joint coordination of multiple echelons and products. Lu et al.~\cite{bib19} extended multi-echelon DRL to disruptive scenarios, showing that DRL policies could maintain reasonable performance under supply disruptions, but their demand model did not incorporate retail-specific temporal patterns.
-
-A critical gap across these studies is the absence of realistic demand generation. Consumer electronics retail---particularly for products like iPhone, iPad, MacBook, Apple Watch, and AirPods---exhibits strong day-of-week patterns, seasonal spikes (e.g., holiday shopping seasons), and product launch effects that are absent from synthetic demand models used in prior work. Furthermore, no existing study simultaneously models the multi-product, multi-echelon structure with shared operational constraints---warehousing capacity, transportation capacity, procurement budget, and category-specific lead times---that characterize real retail supply chains.
+Gijsbrechts et al.~\cite{bib5}, evaluating DRL across several problem classes including a multi-echelon serial system, found that DRL performance degraded as system complexity increased, and that DRL offered the largest advantage over classical heuristics precisely when the problem's constraint structure departed from the assumptions under which those heuristics are provably optimal. The environment studied in this paper departs from the classical single-product setting in an analogous but distinct way: rather than coordinating ordering decisions across supply-chain echelons, it couples five product categories through a single shared retail floor-space budget, so that an agent cannot solve each product's inventory problem independently. This constraint structure, and the systematic comparison of tabular against deep actor-critic methods under it, is not addressed by the multi-echelon studies reviewed above.
 
 \begin{table*}[t]
 \centering
-\caption{Comparison of DRL-Based Multi-Echelon Inventory Studies}
+\caption{Comparison of DRL-Based Inventory Studies}
 \label{tab:comparison}
 \renewcommand{\arraystretch}{1.2}
 \resizebox{\textwidth}{!}{%
 \small
-\begin{tabular}{p{2.2cm}p{1.8cm}p{2.2cm}p{1.5cm}p{1.8cm}p{2.2cm}p{2.8cm}}
+\begin{tabular}{p{2.2cm}p{1.8cm}p{2.2cm}p{2.0cm}p{1.8cm}p{2.6cm}p{2.8cm}}
 \hline
 \textbf{Study} &
 \textbf{Supply Chain} &
 \textbf{Inventory Structure} &
-\textbf{DRL Algorithm} &
+\textbf{DRL Algorithm(s)} &
 \textbf{Demand Model} &
 \textbf{Operational Constraints} &
 \textbf{Main Limitations} \\
 \hline
-Zhang et al.~\cite{bib1} & 3-echelon (M-W-R) & Single product & DQN & Stationary normal & None & Single product; stationary demand; no capacity constraints \\
-Kaynov et al.~\cite{bib16} & 2-echelon (W-MR) & Single product, multiple retailers & PPO & Stationary normal & None & Stationary demand; no capacity constraints; retail-specific patterns absent \\
+Zhang et al.~\cite{bib1} & Multi-echelon (M-W-R) & Single product & SAC-AlphaLR (improved SAC) & Stationary normal & None & Single product; stationary demand; no capacity constraints \\
+Kaynov et al.~\cite{bib16} & 2-echelon (W-MR) & Single product, multiple retailers & Policy gradient & Stationary normal & None & Stationary demand; no capacity constraints; retail-specific patterns absent \\
 Hammler et al.~\cite{bib17} & Multi-echelon & Single product & DQN, PPO & Synthetic pattern & None & Synthetic demand; no holiday effects; single product \\
 Cheng et al.~\cite{bib18} & 3-echelon & Single product & RBF-DQN & Stationary normal & Lead time & Single product; stationary demand; limited operational constraints \\
 Gijsbrechts et al.~\cite{bib5} & Serial, divergent & Single product & DQN, PPO & Stationary & Lead time & Performance degrades with complexity; no retail demand patterns \\
 Lu et al.~\cite{bib19} & Multi-echelon & Single product & DQN & Disruption scenarios & Disruption events & Single product; disruption-focused; no consumer electronics retail \\
-\textbf{This Work} & 2-echelon (W-R) & 5 product categories & PPO & Day-of-week, seasonal, holiday, stochastic & Budget, warehouse/retail/ transport capacity, lead time, holding, trans\-portation, pro\-curement, shortage costs & --- \\
+\textbf{This Work} & 1-echelon (Retail only) & 5 product categories & Random, Q-learning, SARSA, SAC (adaptive temperature) & Day-of-week, seasonal, holiday, stochastic & Shared retail floor-space budget (m\textsuperscript{2}), per-product footprint, per-product order cap & Single fixed evaluation seed; no lead time or upstream warehouse echelon; net loss under current price/penalty configuration \\
 \hline
 \end{tabular}%
 }
 \end{table*}
+% [AI-EDITED] "This Work" row rewritten to match the single-echelon, four-policy,
+% floor-space-constrained system in env/weekly_retail_env.py. The other rows
+% (prior studies) are unchanged from the original draft.
 
 \subsection{Research Gap Summary}
+% [AI-EDITED] Rewritten to match the single-echelon, floor-space-constrained,
+% algorithm-comparison framing.
 
-The preceding review reveals a persistent disconnect between academic DRL inventory research and the operational realities of consumer electronics retail supply chains. Classical inventory models assume stationary demand and fixed policy parameters, while existing DRL studies, despite demonstrating adaptability, remain constrained by simplified demand generation, single-product assumptions, and insufficient operational constraints. The reliance on stationary or weakly non-stationary synthetic demand in prior work overlooks the day-of-week seasonality, holiday surges, and stochastic variation that define retail demand for products such as iPhones, iPads, MacBooks, Apple Watches, and AirPods. Furthermore, the joint consideration of procurement budget, warehouse capacity, retail capacity, transportation capacity, lead times, and cost trade-offs across multiple product categories sharing constrained resources has not been addressed in any existing DRL framework. These gaps motivate the development of a new DRL-based inventory management framework that incorporates realistic, holiday-aware demand generation, multi-product coordination under shared operational constraints, and a two-echelon structure specific to Apple retail, thereby bridging the gap between academic inventory research and industry practice.
-```
-\section{Results}\label{sec2}
+The preceding review reveals two persistent gaps relevant to this study. First, classical inventory models assume stationary demand and fixed policy parameters, while existing DRL studies, despite demonstrating adaptability, are typically evaluated under stationary or weakly non-stationary synthetic demand that does not reflect the day-of-week seasonality, holiday surges, and stochastic variation characteristic of consumer electronics retail. Second, the DRL inventory literature has concentrated on multi-echelon coordination under single-product, uncapacitated (or lead-time-only) settings; the complementary problem of several product categories sharing one physical capacity constraint at a single echelon, and the resulting need to trade off products against one another for the same floor space, has not been directly addressed. Nor has prior work systematically compared tabular RL methods (Q-learning, SARSA) against a deep actor-critic method (SAC) on the same environment and evaluation protocol to isolate the contribution of model capacity (discrete, bucketed value tables versus continuous function approximation) from that of the environment design. These gaps motivate the single-echelon, floor-space-constrained, four-policy comparison study presented in the remainder of this paper.
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+\section{Methodology}\label{sec3}
+% [AI-EDITED] New section, written from scratch based on the verified
+% implementation (env/weekly_retail_env.py, config.py,
+% env/advanced_demand_generator.py) and paper_v1.md Section 3. Replaces the
+% Springer template's placeholder "Results"/example-heading sections.
 
-\section{This is an example for first level head---section head}\label{sec3}
+\subsection{Environment and MDP Formulation}\label{subsec:mdp}
 
-\subsection{This is an example for second level head---subsection head}\label{subsec2}
+The environment, \texttt{WeeklyRetailEnv}, models a single Apple retail store in Vietnam that orders from a distributor once per week and receives stock immediately (zero lead time). Between orders, daily demand depletes inventory over a 7-day cycle. An episode simulates 365 days, so the agent makes at most 52 ordering decisions per episode. The problem is formulated as an MDP $(\mathcal{S}, \mathcal{A}, P, R, \gamma)$ with $\gamma = 0.99$, where one decision step corresponds to one week.
 
-\subsubsection{This is an example for third level head---subsubsection head}\label{subsubsec2}
+\subsubsection{State Space}
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. 
-
-\section{Equations}\label{sec4}
-
-Equations in \LaTeX\ can either be inline or on-a-line by itself (``display equations''). For
-inline equations use the \verb+$...$+ commands. E.g.: The equation
-$H\psi = E \psi$ is written via the command \verb+$H \psi = E \psi$+.
-
-For display equations (with auto generated equation numbers)
-one can use the equation or align environments:
+The state $s \in \mathbb{R}^{26}$ concatenates five 5-dimensional sub-vectors (one entry per product: iPhone, iPad, MacBook, Apple Watch, AirPods) and one scalar:
 \begin{equation}
-\|\tilde{X}(k)\|^2 \leq\frac{\sum\limits_{i=1}^{p}\left\|\tilde{Y}_i(k)\right\|^2+\sum\limits_{j=1}^{q}\left\|\tilde{Z}_j(k)\right\|^2 }{p+q}.\label{eq1}
+s = \Big[\, \tfrac{\mathrm{inv}}{\mathrm{MAX\_CAPACITY}},\ \tfrac{\mathrm{forecast}}{100},\ \tfrac{\mathrm{PURCHASE\_COST}}{5\times 10^{7}},\ \tfrac{\mathrm{STORAGE\_COST}}{5\times 10^{4}},\ \tfrac{\mathrm{SHORTAGE\_PENALTY}}{10^{6}},\ \tfrac{\mathrm{day}}{365} \,\Big]
+\label{eq:state}
 \end{equation}
-where,
-\begin{align}
-D_\mu &=  \partial_\mu - ig \frac{\lambda^a}{2} A^a_\mu \nonumber \\
-F^a_{\mu\nu} &= \partial_\mu A^a_\nu - \partial_\nu A^a_\mu + g f^{abc} A^b_\mu A^a_\nu \label{eq2}
-\end{align}
-Notice the use of \verb+\nonumber+ in the align environment at the end
-of each line, except the last, so as not to produce equation numbers on
-lines where no equation numbers are required. The \verb+\label{}+ command
-should only be used at the last line of an align environment where
-\verb+\nonumber+ is not used.
-\begin{equation}
-Y_\infty = \left( \frac{m}{\textrm{GeV}} \right)^{-3}
-    \left[ 1 + \frac{3 \ln(m/\textrm{GeV})}{15}
-    + \frac{\ln(c_2/5)}{15} \right]
-\end{equation}
-The class file also supports the use of \verb+\mathbb{}+, \verb+\mathscr{}+ and
-\verb+\mathcal{}+ commands. As such \verb+\mathbb{R}+, \verb+\mathscr{R}+
-and \verb+\mathcal{R}+ produces $\mathbb{R}$, $\mathscr{R}$ and $\mathcal{R}$
-respectively (refer Subsubsection~\ref{subsubsec2}).
+where $\mathrm{inv}$ is current on-hand inventory, $\mathrm{forecast}$ is the sum of expected demand over the next 7 days, and the three cost sub-vectors are normalized, near-constant product attributes that let the same network/table generalize across products with different unit economics. The total dimensionality is $5+5+5+5+5+1 = 26$.
 
-\section{Tables}\label{sec5}
+\subsubsection{Action Space}
 
-Tables can be inserted via the normal table and tabular environment. To put
-footnotes inside tables you should use \verb+\footnotetext[]{...}+ tag.
-The footnote appears just below the table itself (refer Tables~\ref{tab1} and \ref{tab2}). 
-For the corresponding footnotemark use \verb+\footnotemark[...]+
+The action $a \in \mathbb{R}^{5}_{\ge 0}$ is a vector of order quantities, one per product, bounded by a per-product weekly cap (Table~\ref{tab:action}). Orders are rounded to the nearest integer and clipped to $[0, \mathrm{MAX\_ORDER}_i]$.
 
 \begin{table}[h]
-\caption{Caption text}\label{tab1}%
-\begin{tabular}{@{}llll@{}}
+\caption{Action space bounds and initial state per product}\label{tab:action}
+\begin{tabular}{@{}lccc@{}}
 \toprule
-Column 1 & Column 2  & Column 3 & Column 4\\
+Product & MAX\_ORDER (units/wk) & Initial inventory & Max capacity \\
 \midrule
-row 1    & data 1   & data 2  & data 3  \\
-row 2    & data 4   & data 5\footnotemark[1]  & data 6  \\
-row 3    & data 7   & data 8  & data 9\footnotemark[2]  \\
+iPhone       & 50  & 50 & 80  \\
+iPad         & 35  & 30 & 60  \\
+MacBook      & 20  & 15 & 35  \\
+Apple Watch  & 35  & 30 & 60  \\
+AirPods      & 100 & 80 & 150 \\
 \botrule
 \end{tabular}
-\footnotetext{Source: This is an example of table footnote. This is an example of table footnote.}
-\footnotetext[1]{Example for a first table footnote. This is an example of table footnote.}
-\footnotetext[2]{Example for a second table footnote. This is an example of table footnote.}
 \end{table}
 
-\noindent
-The input format for the above table is as follows:
+\subsubsection{Floor-Space Constraint}\label{subsec:floor}
 
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{verbatim}
-\begin{table}[<placement-specifier>]
-\caption{<table-caption>}\label{<table-label>}%
-\begin{tabular}{@{}llll@{}}
-\toprule
-Column 1 & Column 2 & Column 3 & Column 4\\
-\midrule
-row 1 & data 1 & data 2	 & data 3 \\
-row 2 & data 4 & data 5\footnotemark[1] & data 6 \\
-row 3 & data 7 & data 8	 & data 9\footnotemark[2]\\
-\botrule
-\end{tabular}
-\footnotetext{Source: This is an example of table footnote. 
-This is an example of table footnote.}
-\footnotetext[1]{Example for a first table footnote.
-This is an example of table footnote.}
-\footnotetext[2]{Example for a second table footnote. 
-This is an example of table footnote.}
-\end{table}
-\end{verbatim}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
+Each product occupies a fixed footprint $f_i$ (m$^2$/unit; Table~\ref{tab:footprint}), and the store has a fixed total retail floor area $A = 25.0$ m$^2$. At the start of an episode, initial inventory already occupies approximately 21.85 m$^2$ (about 87\% of capacity), representing a small Apple-reseller backroom that starts nearly full. Before an order is applied, if the current occupied area plus the requested order's area would exceed $A$, the entire order vector is scaled down proportionally:
+\begin{equation}
+\text{if } \textstyle\sum_i (\mathrm{inv}_i + o_i) f_i > A: \quad
+o_i \leftarrow \left\lfloor o_i \cdot \frac{\max(A - \sum_i \mathrm{inv}_i f_i,\ 0)}{\max(\sum_i o_i f_i,\ 1)} \right\rfloor \quad \forall i
+\label{eq:floor}
+\end{equation}
+This is a binding constraint that couples all five products: ordering more of one product directly reduces the floor budget available to the others, so the environment does not decompose into five independent single-product inventory problems.
 
 \begin{table}[h]
-\caption{Example of a lengthy table which is set to full textwidth}\label{tab2}
-\begin{tabular*}{\textwidth}{@{\extracolsep\fill}lcccccc}
-\toprule%
-& \multicolumn{3}{@{}c@{}}{Element 1\footnotemark[1]} & \multicolumn{3}{@{}c@{}}{Element 2\footnotemark[2]} \\\cmidrule{2-4}\cmidrule{5-7}%
-Project & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ \\
+\caption{Per-product footprint and daily storage cost}\label{tab:footprint}
+\begin{tabular}{@{}lcc@{}}
+\toprule
+Product & Footprint (m$^2$/unit) & Storage cost (VND/unit/day) \\
 \midrule
-Element 3  & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$\\
-Element 4  & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$\\
+iPhone       & 0.10 & 25{,}000 \\
+iPad         & 0.20 & 18{,}000 \\
+MacBook      & 0.35 & 35{,}000 \\
+Apple Watch  & 0.08 & 10{,}000 \\
+AirPods      & 0.04 & 4{,}000  \\
 \botrule
-\end{tabular*}
-\footnotetext{Note: This is an example of table footnote. This is an example of table footnote this is an example of table footnote this is an example of~table footnote this is an example of table footnote.}
-\footnotetext[1]{Example for a first table footnote.}
-\footnotetext[2]{Example for a second table footnote.}
+\end{tabular}
 \end{table}
 
-In case of double column layout, tables which do not fit in single column width should be set to full text width. For this, you need to use \verb+\begin{table*}+ \verb+...+ \verb+\end{table*}+ instead of \verb+\begin{table}+ \verb+...+ \verb+\end{table}+ environment. Lengthy tables which do not fit in textwidth should be set as rotated table. For this, you need to use \verb+\begin{sidewaystable}+ \verb+...+ \verb+\end{sidewaystable}+ instead of \verb+\begin{table*}+ \verb+...+ \verb+\end{table*}+ environment. This environment puts tables rotated to single column width. For tables rotated to double column width, use \verb+\begin{sidewaystable*}+ \verb+...+ \verb+\end{sidewaystable*}+.
+\subsubsection{Reward Function}
 
-\begin{sidewaystable}
-\caption{Tables which are too long to fit, should be written using the ``sidewaystable'' environment as shown here}\label{tab3}
-\begin{tabular*}{\textheight}{@{\extracolsep\fill}lcccccc}
-\toprule%
-& \multicolumn{3}{@{}c@{}}{Element 1\footnotemark[1]}& \multicolumn{3}{@{}c@{}}{Element\footnotemark[2]} \\\cmidrule{2-4}\cmidrule{5-7}%
-Projectile & Energy	& $\sigma_{calc}$ & $\sigma_{expt}$ & Energy & $\sigma_{calc}$ & $\sigma_{expt}$ \\
+The reward is the negative of total weekly cost, scaled by a fixed factor $\lambda = 10^{-8}$:
+\begin{equation}
+r = -\big(C_{\mathrm{proc}} + C_{\mathrm{store}} + C_{\mathrm{short}}\big) \cdot \lambda
+\label{eq:reward}
+\end{equation}
+Procurement cost is charged once, at the start of the week, for units actually received:
+\begin{equation}
+C_{\mathrm{proc}} = \textstyle\sum_i o_i \cdot p_i \cdot w_i
+\label{eq:procurement}
+\end{equation}
+where $p_i$ is the unit purchase price and $w_i \in [0.80, 1.00]$ is a per-product procurement-discount weight reflecting supplier terms. Storage cost is charged once per day over the 7-day week, on end-of-day inventory, at 0.1\% of unit purchase price per day (Table~\ref{tab:footprint}):
+\begin{equation}
+C_{\mathrm{store}} = \textstyle\sum_{d=1}^{7} \sum_i \mathrm{inv}_i(d) \cdot h_i
+\label{eq:storage}
+\end{equation}
+Shortage cost is charged per unit of unmet daily demand at $1.5\times$ the unit purchase price:
+\begin{equation}
+C_{\mathrm{short}} = \textstyle\sum_{d=1}^{7} \sum_i \max\!\big(D_i(d) - \min(\mathrm{inv}_i(d), D_i(d)),\ 0\big) \cdot \pi_i, \qquad \pi_i = 1.5\, p_i
+\label{eq:shortage}
+\end{equation}
+The $1.5\times$ multiplier is the value enforced by the running environment. An earlier design draft of this project specified a $10\times$ multiplier as the intended shortage penalty; the implementation was tuned down to $1.5\times$ during development, and this paper reports the value actually used by the simulation, since the interpretation of the results (Section~\ref{sec6}) depends on it.
+
+\subsection{Reference-Based and Configurable Parameterization}\label{subsec:configuration}
+
+The environment design follows Zhang, He, and Zheng's ME-DRFO formulation~\cite{bib1} at the methodological level: replenishment is represented as an MDP, the reward combines procurement, holding, and shortage costs, and a continuous SAC policy is used to balance exploration and exploitation. The present work does not treat the numerical values in Tables~\ref{tab:action}--\ref{tab:holiday} as universal constants inherited from that study. Zhang et al. study a single-product, multi-echelon FMCG system, whereas the present case study represents five consumer-electronics categories sharing one retail floor-space constraint. Directly copying their product-specific demand and cost values would therefore be inappropriate.
+
+To distinguish the reusable method from the application scenario, the implementation separates three parameter groups. First, algorithmic settings such as $\gamma$, $\tau$, target entropy, and optimizer settings define the learning procedure and are reported for reproducibility. Second, structural choices adapted from~\cite{bib1}, including the MDP formulation, continuous replenishment actions, and cost-based reward, define the model. Third, business inputs---baseline demand, holiday multipliers, prices, storage costs, shortage penalties, order bounds, initial inventory, and floor capacity---define a configurable Apple-retail scenario rather than the algorithm itself. These inputs are exposed through the project configuration and demand-generator interfaces, allowing the same trained policy and evaluation pipeline to be exercised under alternative demand conditions. Section~\ref{subsec:sensitivity} reports such a sensitivity analysis so that the conclusions are not based only on one hard-coded demand curve.
+
+\subsection{Demand Generation}\label{subsec:demand}
+
+Daily demand is produced by a holiday-aware generator that multiplies a day-of-week factor, a slow seasonal sine wave, and a holiday multiplier, then adds Gaussian noise with standard deviation $\max(0.15\,\mu, 1)$. Baseline daily demand $\mu$ is 6, 4, 2, 4, and 10 units/day for iPhone, iPad, MacBook, Apple Watch, and AirPods respectively. Seven recurring holiday windows are defined (Table~\ref{tab:holiday}), each with a per-product peak multiplier and a window width (days) over which a cosine-shaped intensity curve ramps the multiplier up and back down.
+
+\begin{table}[h]
+\caption{Holiday demand windows and per-product peak multipliers}\label{tab:holiday}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Holiday & Day & Width (d) & iPhone & iPad & MacBook & Watch & AirPods \\
 \midrule
-Element 3 & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$ \\
-Element 4 & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$ \\
-Element 5 & 990 A & 1168 & $1547\pm12$ & 780 A & 1166 & $1239\pm100$ \\
-Element 6 & 500 A & 961  & $922\pm10$  & 900 A & 1268 & $1092\pm40$ \\
+Tet Nguyen Dan  & 20  & 14 & 3.5 & 2.5 & 2.0 & 3.0 & 3.5 \\
+Summer Sale     & 100 & 7  & 1.5 & 1.5 & 1.3 & 1.3 & 1.5 \\
+Back to School  & 200 & 21 & 1.3 & 3.5 & 3.0 & 1.2 & 1.3 \\
+Mid-Autumn      & 250 & 5  & 1.2 & 1.3 & 1.0 & 2.0 & 1.5 \\
+Black Friday    & 300 & 7  & 3.0 & 2.5 & 2.0 & 2.0 & 3.0 \\
+Christmas       & 330 & 14 & 2.0 & 2.0 & 1.3 & 2.5 & 3.5 \\
+New Year        & 355 & 10 & 2.0 & 1.8 & 1.5 & 2.0 & 2.5 \\
 \botrule
-\end{tabular*}
-\footnotetext{Note: This is an example of table footnote this is an example of table footnote this is an example of table footnote this is an example of~table footnote this is an example of table footnote.}
-\footnotetext[1]{This is an example of table footnote.}
-\end{sidewaystable}
+\end{tabular}
+\end{table}
 
-\section{Figures}\label{sec6}
+Figure~\ref{fig:demand-profile} visualizes the seeded daily demand realization used for the default evaluation. The series retains stochastic day-to-day variation while showing the event-driven peaks generated by the configurable holiday calendar.
 
-As per the \LaTeX\ standards you need to use eps images for \LaTeX\ compilation and \verb+pdf/jpg/png+ images for \verb+PDFLaTeX+ compilation. This is one of the major difference between \LaTeX\ and \verb+PDFLaTeX+. Each image should be from a single input .eps/vector image file. Avoid using subfigures. The command for inserting images for \LaTeX\ and \verb+PDFLaTeX+ can be generalized. The package used to insert images in \verb+LaTeX/PDFLaTeX+ is the graphicx package. Figures can be inserted via the normal figure environment as shown in the below example:
-
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{verbatim}
-\begin{figure}[<placement-specifier>]
+\begin{figure*}[t]
 \centering
-\includegraphics{<eps-file>}
-\caption{<figure-caption>}\label{<figure-label>}
-\end{figure}
-\end{verbatim}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
+\includegraphics[width=0.92\textwidth]{figures/annual_demand_profile.pdf}
+\caption{Seeded daily demand profile for the five product categories. All labels are reported in English; vertical reference lines indicate configured holiday centers.}\label{fig:demand-profile}
+\end{figure*}
 
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.9\textwidth]{fig.eps}
-\caption{This is a widefig. This is an example of long caption this is an example of long caption  this is an example of long caption this is an example of long caption}\label{fig1}
-\end{figure}
+\subsection{Ordering Policies}\label{sec:algorithms}
 
-In case of double column layout, the above format puts figure captions/images to single column width. To get spanned images, we need to provide \verb+\begin{figure*}+ \verb+...+ \verb+\end{figure*}+.
+Four ordering policies are trained and evaluated on the environment described above.
 
-For sample purpose, we have included the width of images in the optional argument of \verb+\includegraphics+ tag. Please ignore this. 
+\subsubsection{Random Baseline}
 
-\section{Algorithms, Program codes and Listings}\label{sec7}
+Each week, order quantities are drawn independently per product from a continuous uniform distribution over $[0, \mathrm{MAX\_ORDER}_i]$. This baseline has no learning component and serves as a reference point for measuring the value added by the three learned policies.
 
-Packages \verb+algorithm+, \verb+algorithmicx+ and \verb+algpseudocode+ are used for setting algorithms in \LaTeX\ using the format:
+\subsubsection{Tabular Q-Learning and SARSA}
 
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{verbatim}
-\begin{algorithm}
-\caption{<alg-caption>}\label{<alg-label>}
-\begin{algorithmic}[1]
-. . .
-\end{algorithmic}
-\end{algorithm}
-\end{verbatim}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-
-You may refer above listed package documentations for more details before setting \verb+algorithm+ environment. For program codes, the ``verbatim'' package is required and the command to be used is \verb+\begin{verbatim}+ \verb+...+ \verb+\end{verbatim}+. 
-
-Similarly, for \verb+listings+, use the \verb+listings+ package. \verb+\begin{lstlisting}+ \verb+...+ \verb+\end{lstlisting}+ is used to set environments similar to \verb+verbatim+ environment. Refer to the \verb+lstlisting+ package documentation for more details.
-
-A fast exponentiation procedure:
-
-\lstset{texcl=true,basicstyle=\small\sf,commentstyle=\small\rm,mathescape=true,escapeinside={(*}{*)}}
-\begin{lstlisting}
-begin
-  for $i:=1$ to $10$ step $1$ do
-      expt($2,i$);  
-      newline() od                (*\textrm{Comments will be set flush to the right margin}*)
-where
-proc expt($x,n$) $\equiv$
-  $z:=1$;
-  do if $n=0$ then exit fi;
-     do if odd($n$) then exit fi;                 
-        comment: (*\textrm{This is a comment statement;}*)
-        $n:=n/2$; $x:=x*x$ od;
-     { $n>0$ };
-     $n:=n-1$; $z:=z*x$ od;
-  print($z$). 
-end
-\end{lstlisting}
+Following Watkins and Dayan~\cite{bib20}, a per-product Q-table is maintained over a discretized (inventory bucket, forecast bucket) state, with 14 inventory buckets shared across products and 10 product-specific forecast buckets. Each product has its own discrete set of candidate order levels (e.g., iPhone: 0, 5, 10, 15, 20, 30, 40, 50 units), and the agent selects, independently per product, the order level with the highest Q-value under an $\varepsilon$-greedy policy. SARSA~\cite{bib21} uses the identical state discretization, action set, and hyperparameters, but is on-policy: its temporal-difference target uses the value of the action actually taken next under the same $\varepsilon$-greedy policy rather than the maximum over next-state actions, which makes it more conservative in the presence of exploration noise. Both agents use learning rate $0.1$, discount factor $\gamma = 0.99$, and $\varepsilon$ decaying from $0.3$ to a floor of $0.01$ (decay factor $0.995$ per episode) over 200 training episodes.
 
 \begin{algorithm}
-\caption{Calculate $y = x^n$}\label{algo1}
+\caption{Per-product tabular update (Q-learning / SARSA)}\label{algo:qlearning}
 \begin{algorithmic}[1]
-\Require $n \geq 0 \vee x \neq 0$
-\Ensure $y = x^n$ 
-\State $y \Leftarrow 1$
-\If{$n < 0$}\label{algln2}
-        \State $X \Leftarrow 1 / x$
-        \State $N \Leftarrow -n$
-\Else
-        \State $X \Leftarrow x$
-        \State $N \Leftarrow n$
-\EndIf
-\While{$N \neq 0$}
-        \If{$N$ is even}
-            \State $X \Leftarrow X \times X$
-            \State $N \Leftarrow N / 2$
-        \Else[$N$ is odd]
-            \State $y \Leftarrow y \times X$
-            \State $N \Leftarrow N - 1$
-        \EndIf
-\EndWhile
+\Require learning rate $\alpha=0.1$, discount $\gamma=0.99$, exploration $\varepsilon$
+\For{episode $=1$ to $200$}
+  \State $s \gets \mathrm{env.reset()}$
+  \If{SARSA} $a \gets \varepsilon\text{-greedy}(Q, s)$ \EndIf
+  \While{episode not done}
+    \If{Q-learning} $a \gets \varepsilon\text{-greedy}(Q, s)$ \EndIf
+    \State $s', r, \mathrm{done} \gets \mathrm{env.step}(a)$
+    \If{Q-learning}
+      \State $\mathrm{target} \gets r/5 + \gamma \max_{a'} Q(s', a')$
+    \Else \Comment{SARSA}
+      \State $a' \gets \varepsilon\text{-greedy}(Q, s')$
+      \State $\mathrm{target} \gets r/5 + \gamma\, Q(s', a')$
+    \EndIf
+    \State $Q(s,a) \gets Q(s,a) + \alpha\,\big(\mathrm{target} - Q(s,a)\big)$
+    \State $s \gets s'$; \ \ (SARSA: $a \gets a'$)
+  \EndWhile
+  \State $\varepsilon \gets \max(\varepsilon \cdot 0.995,\ 0.01)$
+\EndFor
 \end{algorithmic}
 \end{algorithm}
 
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{minipage}{\hsize}%
-\lstset{frame=single,framexleftmargin=-1pt,framexrightmargin=-17pt,framesep=12pt,linewidth=0.98\textwidth,language=pascal}% Set your language (you can change the language for each code-block optionally)
-%%% Start your code-block
-\begin{lstlisting}
-for i:=maxint to 0 do
-begin
-{ do nothing }
-end;
-Write('Case insensitive ');
-Write('Pascal keywords.');
-\end{lstlisting}
-\end{minipage}
+\subsubsection{SAC-AlphaLR}\label{subsec:sac}
 
-\section{Cross referencing}\label{sec8}
+The deep actor-critic agent, denoted SAC-AlphaLR, reuses the class/checkpoint name from the verified implementation, which in turn follows the naming used by Zhang, He, and Zheng~\cite{bib1} for their adaptive-temperature, adaptive-learning-rate SAC variant. The policy follows the Soft Actor-Critic formulation of Haarnoja et al.~\cite{bib3} with the automatic temperature tuning introduced in~\cite{bib23}. \textbf{Note on naming:} unlike the SAC-AlphaLR of~\cite{bib1}, the implementation evaluated in this paper adapts only the temperature $\alpha$ (Eq.~\ref{eq:alpha}); it does not implement an adaptive learning-rate schedule. All three optimizers (actor, critic, and the temperature optimizer) use a fixed Adam learning rate of $3\times10^{-4}$ throughout training, with no scheduler. The name SAC-AlphaLR is retained here for consistency with the codebase and checkpoint used to produce the results in this paper, but only the ``Alpha'' (adaptive-temperature) component of that name is implemented; the ``LR'' (adaptive-learning-rate) component is not. The actor is a feedforward network (state dimension 26, two hidden layers of 256 units, ReLU activations) with separate mean and log-standard-deviation heads (log-std clamped to $[-20, 2]$) over the 5-dimensional action space; actions are sampled via the reparameterization trick, squashed through $\tanh$, and rescaled to $[0, \mathrm{MAX\_ORDER}]$. Two independent critic networks (input dimension $26+5=31$, two hidden layers of 256 units, scalar output) form a twin-Q critic used to mitigate value overestimation. The temperature $\alpha$ is optimized against a target entropy $\mathcal{H}_{\text{target}} = -5$ (the negative of the action dimensionality), via
+\begin{equation}
+\mathcal{L}(\alpha) = -\,\mathbb{E}\big[\log\alpha \cdot (\log \pi(a|s) + \mathcal{H}_{\text{target}})\big]
+\label{eq:alpha}
+\end{equation}
+All three networks (actor, critic, temperature) use Adam with learning rate $3\times 10^{-4}$; the discount factor is $\gamma=0.99$ and the target-network soft-update coefficient is $\tau = 0.005$. Gradient norms for the actor and critic losses are clipped to $1.0$. At evaluation time the agent acts deterministically ($\tanh$ of the mean, without sampling); the checkpoint used in this paper's results was trained for 200 episodes prior to evaluation.
 
-Environments such as figure, table, equation and align can have a label
-declared via the \verb+\label{#label}+ command. For figures and table
-environments use the \verb+\label{}+ command inside or just
-below the \verb+\caption{}+ command. You can then use the
-\verb+\ref{#label}+ command to cross-reference them. As an example, consider
-the label declared for Figure~\ref{fig1} which is
-\verb+\label{fig1}+. To cross-reference it, use the command 
-\verb+Figure \ref{fig1}+, for which it comes up as
-``Figure~\ref{fig1}''. 
+\section{Experimental Setup}\label{sec4}
+% [AI-EDITED] New section, written from the actual evaluation protocol used
+% in dashboard/backend/rollout.py (matches paper_v1.md Section 5).
 
-To reference line numbers in an algorithm, consider the label declared for the line number 2 of Algorithm~\ref{algo1} is \verb+\label{algln2}+. To cross-reference it, use the command \verb+\ref{algln2}+ for which it comes up as line~\ref{algln2} of Algorithm~\ref{algo1}.
+All four policies were evaluated on the same 52-week rollout of \texttt{WeeklyRetailEnv}, using the demand configuration in Section~\ref{subsec:demand} and a fixed random seed for reproducibility. Q-learning and SARSA were trained from scratch for 200 episodes immediately before their evaluation rollout; SAC-AlphaLR was evaluated using a checkpoint already trained for 200 episodes. The random baseline required no training. A second evaluation stage varied baseline demand and holiday intensity through the environment's configuration interface while holding the SAC checkpoint, seed, prices, and capacity constant. Wall-clock time was measured on the evaluation machine: Q-learning training plus rollout completed in approximately 3.6 s, SARSA in approximately 3.8 s, SAC-AlphaLR evaluation (checkpoint load plus rollout, no training) in approximately 0.7 s, and the random baseline in under 0.1 s.
 
-\subsection{Details on reference citations}\label{subsec7}
+\section{Results}\label{sec5}
+% [AI-EDITED] New section; all figures below are measured directly from a
+% real run of dashboard/backend/rollout.py, not illustrative placeholders.
 
-Standard \LaTeX\ permits only numerical citations. To support both numerical and author-year citations this template uses \verb+natbib+ \LaTeX\ package. For style guidance please refer to the template user manual.
+Table~\ref{tab:results} reports the full-year (52-week) cost breakdown for each policy.
 
-Here is an example for \verb+\cite{...}+: \cite{bib1}. Another example for \verb+\citep{...}+: \citep{bib2}. For author-year citation mode, \verb+\cite{...}+ prints Jones et al. (1990) and \verb+\citep{...}+ prints (Jones et al., 1990).
-
-All cited bib entries are printed at the end of this article: \cite{bib3}, \cite{bib4}, \cite{bib5}, \cite{bib6}, \cite{bib7}, \cite{bib8}, \cite{bib9}, \cite{bib10}, \cite{bib11}, \cite{bib12} and \cite{bib13}.
-
-\section{Examples for theorem like environments}\label{sec10}
-
-For theorem like environments, we require \verb+amsthm+ package. There are three types of predefined theorem styles exists---\verb+thmstyleone+, \verb+thmstyletwo+ and \verb+thmstylethree+ 
-
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
-\bigskip
-\begin{tabular}{|l|p{19pc}|}
-\hline
-\verb+thmstyleone+ & Numbered, theorem head in bold font and theorem text in italic style \\\hline
-\verb+thmstyletwo+ & Numbered, theorem head in roman font and theorem text in italic style \\\hline
-\verb+thmstylethree+ & Numbered, theorem head in bold font and theorem text in roman style \\\hline
+\begin{table*}[t]
+\centering
+\caption{Annual cost breakdown by policy (VND, billions unless noted)}\label{tab:results}
+\begin{tabular}{@{}lccccccc@{}}
+\toprule
+Policy & Procurement & Storage & Shortage & Total cost & Revenue & Net profit & Stockout units \\
+\midrule
+Random       & 77.69  & 0.27 & 104.67 & 182.64 & 108.96 & $-73.68$ & 5{,}022 \\
+Q-learning   & 93.42  & 0.56 & 84.11  & 178.09 & 124.60 & $-53.49$ & 4{,}286 \\
+SARSA        & 100.44 & 0.61 & 69.99  & 171.05 & 135.18 & $-35.87$ & 3{,}785 \\
+SAC-AlphaLR  & 100.12 & 0.41 & 66.82  & 167.35 & 139.47 & $-27.88$ & 2{,}709 \\
+\botrule
 \end{tabular}
-\bigskip
-%%=============================================%%
-%% For presentation purpose, we have included  %%
-%% \bigskip command. Please ignore this.       %%
-%%=============================================%%
+\end{table*}
 
-For mathematics journals, theorem styles can be included as shown in the following examples:
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/policy_performance.pdf}
+\caption{Annual cost composition, stockout units, and storage cost under the four evaluated policies. Storage is shown again on a separate scale because it represents only 0.2--0.4\% of total cost. Values are generated from the same seed-42 rollouts reported in Table~\ref{tab:results}.}\label{fig:policy-performance}
+\end{figure*}
 
-\begin{theorem}[Theorem subhead]\label{thm1}
-Example theorem text. Example theorem text. Example theorem text. Example theorem text. Example theorem text. 
-Example theorem text. Example theorem text. Example theorem text. Example theorem text. Example theorem text. 
-Example theorem text. 
-\end{theorem}
+Relative to the random baseline, total cost is reduced by 2.5\% under Q-learning, 6.3\% under SARSA, and 8.4\% under SAC-AlphaLR. The ordering across all three learned policies is consistent: each shifts spend away from shortage cost and toward procurement cost, buying more proactively to avoid stockouts, and each reduces stockout units monotonically from random (5{,}022) to Q-learning (4{,}286) to SARSA (3{,}785) to SAC-AlphaLR (2{,}709), a 46\% reduction relative to random. Figure~\ref{fig:policy-performance} makes both effects visible. Storage cost remains a minor component of total cost across all four policies (0.2--0.4\%), reflecting that the floor-space constraint (Eq.~\ref{eq:floor}) keeps absolute stock levels, and therefore storage cost, bounded regardless of policy. Shortage cost is the dominant cost component for every policy (57.3\% of total cost under random, falling to 39.9\% under SAC-AlphaLR), consistent with weekly demand frequently exceeding what the floor-space-constrained store can hold, particularly during the seven annual holiday demand spikes (Table~\ref{tab:holiday}).
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+\subsection{Configuration Sensitivity}\label{subsec:sensitivity}
 
-\begin{proposition}
-Example proposition text. Example proposition text. Example proposition text. Example proposition text. Example proposition text. 
-Example proposition text. Example proposition text. Example proposition text. Example proposition text. Example proposition text. 
-\end{proposition}
+To test whether the reported behavior is specific to the default demand configuration, the trained SAC-AlphaLR checkpoint was evaluated without retraining on a $3\times3$ scenario grid. Baseline demand was scaled to $0.8\times$, $1.0\times$, and $1.2\times$ the default vector, while holiday uplift above ordinary demand was independently scaled to $0.5\times$, $1.0\times$, and $1.5\times$. All nine rollouts used seed 42 and the same prices, capacity, and policy checkpoint; the center cell therefore reproduces the default result in Table~\ref{tab:results}.
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.92\textwidth]{figures/configuration_sensitivity.pdf}
+\caption{Sensitivity of SAC-AlphaLR to configurable baseline-demand and holiday-intensity multipliers. The policy is evaluated without retraining; darker cells indicate higher annual cost or more unmet demand.}\label{fig:configuration-sensitivity}
+\end{figure*}
 
-\begin{example}
-Phasellus adipiscing semper elit. Proin fermentum massa
-ac quam. Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia. Nam ipsum ligula, eleifend
-at, accumsan nec, suscipit a, ipsum. Morbi blandit ligula feugiat magna. Nunc eleifend consequat lorem. 
-\end{example}
+As Figure~\ref{fig:configuration-sensitivity} shows, annual cost ranges from 108.1 to 249.9 billion VND and unmet demand ranges from 560 to 6{,}270 units across the scenario grid. Both measures increase monotonically as either baseline demand or holiday intensity increases. This confirms that the evaluation pipeline responds to configurable operating conditions rather than embedding one immutable demand trajectory. It also qualifies the default-policy comparison: SAC-AlphaLR is best among the four policies in the default scenario, but absolute cost and service performance remain strongly dependent on the selected business scenario.
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+\section{Discussion}\label{sec6}
+% [AI-EDITED] New section, adapted from paper_v1.md Section 7.
 
-\begin{remark}
-Phasellus adipiscing semper elit. Proin fermentum massa
-ac quam. Sed diam turpis, molestie vitae, placerat a, molestie nec, leo. Maecenas lacinia. Nam ipsum ligula, eleifend
-at, accumsan nec, suscipit a, ipsum. Morbi blandit ligula feugiat magna. Nunc eleifend consequat lorem. 
-\end{remark}
+\textbf{All four policies operate at a net loss.} Total cost exceeds revenue for every policy evaluated, including SAC-AlphaLR, the best-performing policy. This is reported directly because it changes how the comparison should be read: the learned policies are best understood here as reducing losses (from $-73.68$ billion VND under random to $-27.88$ billion VND under SAC-AlphaLR) rather than as producing a profitable ordering strategy. The gap follows from the interaction of two modeled factors: shortage cost, at $1.5\times$ unit purchase price (Eq.~\ref{eq:shortage}), is high relative to the retail margin (20--50\% depending on product), and demand frequently exceeds what the 25 m$^2$ floor constraint allows the store to stock, so even a well-trained policy cannot fully avoid shortage cost. Whether this outcome should be corrected (by relaxing the floor constraint, lowering the shortage-penalty multiplier, or raising margins) or treated as an intentional stress test of the algorithms under an under-provisioned store is a modeling decision outside the scope of this paper.
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+\textbf{On-policy versus off-policy comparison.} SARSA outperforms Q-learning in this setting (6.3\% versus 2.5\% cost reduction relative to random). This is plausible given the coarse action discretization used by both tabular agents: an on-policy method that accounts for the exploration noise embedded in its own action choices can be more conservative, and here more effective, than an off-policy method that always bootstraps toward the greedy action. This finding should not be over-generalized beyond this specific environment and discretization, since the relative performance of on-policy and off-policy tabular methods is known to be problem-dependent~\cite{bib22}.
 
-\begin{definition}[Definition sub head]
-Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. Example definition text. 
-\end{definition}
+\textbf{Deep actor-critic advantage.} SAC-AlphaLR outperforms both tabular methods, consistent with its access to a continuous action space and a non-discretized state representation. This is consistent with the broader finding of Gijsbrechts et al.~\cite{bib5} that deep RL offers the largest advantage over classical heuristics and simpler RL baselines precisely when the action and state spaces are large or continuous and the constraint structure does not decompose cleanly per product, which is the case for the shared floor-space budget studied here.
 
-Additionally a predefined ``proof'' environment is available: \verb+\begin{proof}+ \verb+...+ \verb+\end{proof}+. This prints a ``Proof'' head in italic font style and the ``body text'' in roman font style with an open square at the end of each proof environment. 
+\section{Limitations and Future Work}\label{sec7}
+% [AI-EDITED] New section, adapted from paper_v1.md Sections 7-8.
 
-\begin{proof}
-Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. 
-\end{proof}
+All results in this paper come from a single fixed random seed; no confidence intervals or repeated-seed variance estimates are reported, since the evaluation pipeline currently runs one deterministic rollout per policy. A stronger evaluation would average results over multiple seeds and report variance, particularly given that the random baseline and the demand generator are themselves stochastic. The environment models zero lead time (orders are received the same week they are placed) and a single retail echelon with no intermediate warehouse; extending the model to include lead time and an upstream warehouse echelon would allow direct comparison with the multi-echelon studies reviewed in Section~\ref{sec2}. Finally, given the net-loss result in Section~\ref{sec6}, future work should evaluate the demand and cost parameters (retail margins, the shortage-penalty multiplier, and the floor-space budget) for economic realism, since the current configuration does not admit a profitable policy under any of the four methods tested.
 
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text. Sample body text.
+\section{Conclusion}\label{sec8}
+% [AI-EDITED] New section, adapted from paper_v1.md Section 8.
 
-\begin{proof}[Proof of Theorem~{\upshape\ref{thm1}}]
-Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. Example for proof text. 
-\end{proof}
-
-\noindent
-For a quote environment, use \verb+\begin{quote}...\end{quote}+
-\begin{quote}
-Quoted text example. Aliquam porttitor quam a lacus. Praesent vel arcu ut tortor cursus volutpat. In vitae pede quis diam bibendum placerat. Fusce elementum
-convallis neque. Sed dolor orci, scelerisque ac, dapibus nec, ultricies ut, mi. Duis nec dui quis leo sagittis commodo.
-\end{quote}
-
-Sample body text. Sample body text. Sample body text. Sample body text. Sample body text (refer Figure~\ref{fig1}). Sample body text. Sample body text. Sample body text (refer Table~\ref{tab3}). 
-
-\section{Methods}\label{sec11}
-
-Topical subheadings are allowed. Authors must ensure that their Methods section includes adequate experimental and characterization data necessary for others in the field to reproduce their work. Authors are encouraged to include RIIDs where appropriate. 
-
-\textbf{Ethical approval declarations} (only required where applicable) Any article reporting experiment/s carried out on (i)~live vertebrate (or higher invertebrates), (ii)~humans or (iii)~human samples must include an unambiguous statement within the methods section that meets the following requirements: 
-
-\begin{enumerate}[1.]
-\item Approval: a statement which confirms that all experimental protocols were approved by a named institutional and/or licensing committee. Please identify the approving body in the methods section
-
-\item Accordance: a statement explicitly saying that the methods were carried out in accordance with the relevant guidelines and regulations
-
-\item Informed consent (for experiments involving humans or human tissue samples): include a statement confirming that informed consent was obtained from all participants and/or their legal guardian/s
-\end{enumerate}
-
-If your manuscript includes potentially identifying patient/participant information, or if it describes human transplantation research, or if it reports results of a clinical trial then  additional information will be required. Please visit (\url{https://www.nature.com/nature-research/editorial-policies}) for Nature Portfolio journals, (\url{https://www.springer.com/gp/authors-editors/journal-author/journal-author-helpdesk/publishing-ethics/14214}) for Springer Nature journals, or (\url{https://www.biomedcentral.com/getpublished/editorial-policies\#ethics+and+consent}) for BMC.
-
-\section{Discussion}\label{sec12}
-
-Discussions should be brief and focused. In some disciplines use of Discussion or `Conclusion' is interchangeable. It is not mandatory to use both. Some journals prefer a section `Results and Discussion' followed by a section `Conclusion'. Please refer to Journal-level guidance for any specific requirements. 
-
-\section{Conclusion}\label{sec13}
-
-Conclusions may be used to restate your hypothesis or research question, restate your major findings, explain the relevance and the added value of your work, highlight any limitations of your study, describe future directions for research and recommendations. 
-
-In some disciplines use of Discussion or 'Conclusion' is interchangeable. It is not mandatory to use both. Please refer to Journal-level guidance for any specific requirements. 
+This paper presented a weekly, floor-space-constrained retail inventory MDP for a five-category Apple store and compared four ordering policies, random, Q-learning, SARSA, and SAC-AlphaLR, under a shared 52-week evaluation protocol. SAC-AlphaLR achieved the lowest total annual cost and fewest stockout units among the four policies, consistent with its continuous action space and non-discretized state representation. The sensitivity analysis further showed that the pipeline supports configurable demand scenarios and that absolute cost and service outcomes change materially with baseline demand and holiday intensity. All reported figures, including the environment's cost structure, demand configuration, and evaluation results, were verified directly against the running implementation rather than an earlier design specification, and the paper documents explicitly where the two diverged, most notably the shortage-penalty multiplier, which is $1.5\times$ purchase cost in the running system rather than the $10\times$ figure in the earlier draft. Future work should evaluate the environment's demand and cost parameters for economic realism given the net-loss result reported in Section~\ref{sec6}, extend the evaluation protocol to multiple random seeds, and consider extending the model to a multi-echelon structure with non-zero lead time.
 
 \backmatter
 
 \bmhead{Supplementary information}
 
-If your article has accompanying supplementary file/s please state so here. 
-
-Authors reporting data from electrophoretic gels and blots should supply the full unprocessed scans for key as part of their Supplementary information. This may be requested by the editorial team/s if it is missing.
-
-Please refer to Journal-level guidance for any specific requirements.
+Not applicable.
 
 \bmhead{Acknowledgements}
 
-Acknowledgements are not compulsory. Where included they should be brief. Grant or contribution numbers may be acknowledged.
-
-Please refer to Journal-level guidance for any specific requirements.
+Not applicable.
+% [AI-EDITED] Both backmatter items above were placeholder template text;
+% replaced with "Not applicable" pending author input. Please fill in if
+% there is a funding body or supplementary file to disclose.
 
 \section*{Declarations}
-
-Some journals require declarations to be submitted in a standardised format. Please check the Instructions for Authors of the journal to which you are submitting to see if you need to complete this section. If yes, your manuscript must contain the following sections under the heading `Declarations':
+% [AI-EDITED] Filled in with best-guess defaults for a simulation-only study
+% with no human/animal subjects. Please review every line before submission,
+% especially Data availability and Code availability (repository URL
+% intentionally left blank rather than guessed).
 
 \begin{itemize}
-\item Funding
-\item Conflict of interest/Competing interests (check journal-specific guidelines for which heading to use)
-\item Ethics approval and consent to participate
-\item Consent for publication
-\item Data availability 
-\item Materials availability
-\item Code availability 
-\item Author contribution
+\item \textbf{Funding:} Not applicable.
+\item \textbf{Conflict of interest/Competing interests:} The authors declare no competing interests.
+\item \textbf{Ethics approval and consent to participate:} Not applicable. This study is a computational simulation and does not involve human participants, human data, or animal subjects.
+\item \textbf{Consent for publication:} Not applicable.
+\item \textbf{Data availability:} Not applicable. This study does not use any external dataset; all demand data are synthetically generated at runtime by the holiday-aware demand generator described in Section~\ref{subsec:demand}, whose parameters are fully specified in Table~\ref{tab:holiday} and can be regenerated exactly from the equations and parameters reported in this paper.
+\item \textbf{Materials availability:} Not applicable.
+\item \textbf{Code availability:} The environment, agent implementations, and evaluation scripts used to produce the results in this paper are available from the authors upon reasonable request.
+\item \textbf{Author contribution:} [Author: please fill in individual author contributions, e.g., using CRediT taxonomy roles.]
 \end{itemize}
-
-\noindent
-If any of the sections are not relevant to your manuscript, please include the heading and write `Not applicable' for that section. 
-
-%%===================================================%%
-%% For presentation purpose, we have included        %%
-%% \bigskip command. Please ignore this.             %%
-%%===================================================%%
-\bigskip
-\begin{flushleft}%
-Editorial Policies for:
-
-\bigskip\noindent
-Springer journals and proceedings: \url{https://www.springer.com/gp/editorial-policies}
-
-\bigskip\noindent
-Nature Portfolio journals: \url{https://www.nature.com/nature-research/editorial-policies}
-
-\bigskip\noindent
-\textit{Scientific Reports}: \url{https://www.nature.com/srep/journal-policies/editorial-policies}
-
-\bigskip\noindent
-BMC journals: \url{https://www.biomedcentral.com/getpublished/editorial-policies}
-\end{flushleft}
-
-\begin{appendices}
-
-\section{Section title of first appendix}\label{secA1}
-
-An appendix contains supplementary information that is not an essential part of the text itself but which may be helpful in providing a more comprehensive understanding of the research problem or it is information that is too cumbersome to be included in the body of the paper.
-
-%%=============================================%%
-%% For submissions to Nature Portfolio Journals %%
-%% please use the heading ``Extended Data''.   %%
-%%=============================================%%
-
-%%=============================================================%%
-%% Sample for another appendix section			       %%
-%%=============================================================%%
-
-%% \section{Example of another appendix section}\label{secA2}%
-%% Appendices may be used for helpful, supporting or essential material that would otherwise 
-%% clutter, break up or be distracting to the text. Appendices can consist of sections, figures, 
-%% tables and equations etc.
-
-\end{appendices}
-
-%%===========================================================================================%%
-%% If you are submitting to one of the Nature Portfolio journals, using the eJP submission   %%
-%% system, please include the references within the manuscript file itself. You may do this  %%
-%% by copying the reference list from your .bbl file, paste it into the main manuscript .tex %%
-%% file, and delete the associated \verb+\bibliography+ commands.                            %%
-%%===========================================================================================%%
 
 \bibliography{sn-bibliography}
 % common bib file
-%% if required, the content of .bbl file can be included here once bbl is generated
-%%\input sn-article.bbl
 
 \end{document}
