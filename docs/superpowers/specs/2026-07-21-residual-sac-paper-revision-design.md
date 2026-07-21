@@ -1,107 +1,116 @@
-# Residual SAC Paper Revision Design
+# Đặc tả chỉnh sửa paper về Residual SAC
 
-## Objective
+## Mục tiêu
 
-Rewrite `sn-article.tex` so that it reports only the current fixed-capacity,
-two-delivery Residual SAC-AutoAlpha system. Remove the previous single-delivery
-experiment, its policy comparisons, metrics, interpretations, and conclusions
-because that experimental design is invalid for the revised paper.
+Viết lại `sn-article.tex` để bài báo chỉ trình bày hệ thống hiện tại: bài toán
+giới hạn sức chứa cố định, hai lần giao hàng mỗi tuần và thuật toán Residual
+SAC-AutoAlpha. Loại bỏ toàn bộ thí nghiệm một lần giao hàng trước đây, các phép
+so sánh chính sách, số liệu, diễn giải và kết luận liên quan vì thiết kế thí
+nghiệm đó không còn hợp lệ đối với phiên bản paper mới.
 
-## Authoritative Sources
+## Nguồn thông tin chính
 
-- `ref_paper_v4_update.md` supplies the verified technical narrative, values,
-  experimental protocol, caveats, and citation mapping.
-- The current implementation and experiment artifacts cited by that document
-  are the provenance for technical and numerical claims.
-- `figures/fig_mdp_architecture.png`,
-  `figures/fig_service_inventory_frontier.png`, and
-  `figures/fig_residual_weight_ablation.png` are the figures used in the paper.
-- `figures/fig_before_after_service.png` is excluded because its “Before” arm
-  belongs to the invalid earlier design.
+- `ref_paper_v4_update.md` cung cấp nội dung kỹ thuật, số liệu, quy trình thí
+  nghiệm, các điểm cần lưu ý và ánh xạ tài liệu tham khảo đã được kiểm tra.
+- Mã nguồn hiện tại và các tệp kết quả thí nghiệm được trích dẫn trong tài liệu
+  trên là nguồn gốc của các tuyên bố kỹ thuật và số liệu.
+- Paper sẽ sử dụng ba hình: `figures/fig_mdp_architecture.png`,
+  `figures/fig_service_inventory_frontier.png` và
+  `figures/fig_residual_weight_ablation.png`.
+- Không sử dụng `figures/fig_before_after_service.png` vì phần “Before” thuộc
+  thiết kế cũ không hợp lệ.
 
-## Editorial Scope
+## Phạm vi biên tập
 
-Retain the Springer Nature LaTeX template, author metadata, declarations, and
-bibliography infrastructure. Retain literature-review material only where it
-still supports the revised problem and method. Rewrite the title, abstract,
-introduction, methodology, experimental setup, results, discussion,
-limitations, conclusion, tables, equations, figure captions, cross-references,
-and reproducibility statements wherever they depend on the earlier design.
+Giữ nguyên mẫu LaTeX Springer Nature, thông tin tác giả, phần tuyên bố và cơ chế
+quản lý tài liệu tham khảo. Chỉ giữ lại nội dung tổng quan nghiên cứu nếu nội
+dung đó vẫn hỗ trợ đúng cho bài toán và phương pháp mới. Viết lại tiêu đề, tóm
+tắt, giới thiệu, phương pháp, thiết lập thí nghiệm, kết quả, thảo luận, hạn chế,
+kết luận, bảng biểu, công thức, chú thích hình, tham chiếu chéo và tuyên bố về
+khả năng tái lập ở tất cả những nơi đang phụ thuộc vào thiết kế cũ.
 
-Delete all claims that treat Random, Q-learning, SARSA, single-delivery SAC, or
-the old SAC-AutoAlpha checkpoint as current experimental results. The paper may
-mention tabular methods or vanilla SAC only as literature or architectural
-context; it must not report the invalid old comparison as evidence.
+Xóa mọi tuyên bố xem Random, Q-learning, SARSA, SAC một lần giao hàng hoặc
+checkpoint SAC-AutoAlpha cũ là kết quả thực nghiệm hiện tại. Paper chỉ được
+nhắc đến các phương pháp dạng bảng hoặc vanilla SAC trong phần tổng quan hay
+bối cảnh kiến trúc; không được dùng phép so sánh cũ không hợp lệ làm bằng chứng.
 
-## Revised Scientific Narrative
+## Câu chuyện khoa học mới
 
-The central problem is physical infeasibility: representative seven-day demand
-requires about 50.39 m² of goods, while the retail area is capped at 25 m².
-The structural intervention is therefore two replenishment events per week
-(day 0 and day 3), reusing the same five-dimensional per-trip action after
-mid-week sales release capacity.
+Vấn đề trung tâm là tính bất khả thi về mặt vật lý: lượng hàng đáp ứng nhu cầu
+bảy ngày trong một tuần đại diện cần khoảng 50,39 m², trong khi diện tích bán
+lẻ bị giới hạn ở 25 m². Can thiệp mang tính cấu trúc là tổ chức hai lần bổ sung
+hàng mỗi tuần, vào ngày 0 và ngày 3. Cùng một action năm chiều biểu diễn lượng
+bổ sung cho mỗi chuyến được sử dụng lại sau khi hoạt động bán hàng giữa tuần đã
+giải phóng một phần diện tích.
 
-The control policy is Residual SAC-AutoAlpha, not vanilla SAC. Its executed
-proposal blends a service-coverage baseline and the learned actor:
+Chính sách điều khiển là Residual SAC-AutoAlpha, không phải vanilla SAC. Action
+đề xuất cuối cùng kết hợp một baseline đảm bảo mức độ phục vụ và đầu ra của
+actor học được:
 
 `a_final(s) = (1 - w) baseline(s) + w pi_theta(s)`,
 
-with coverage factor 1.20 and residual weight `w = 0.10`. The paper explains
-the division by two in the baseline, the affine-policy Jacobian correction,
-the hard area-scaling mechanism, automatic entropy-temperature tuning, and the
-separation between accounting profit and reward-shaping penalties.
+với hệ số bao phủ bằng 1,20 và trọng số residual `w = 0,10`. Paper sẽ giải thích
+phép chia hai trong baseline, hiệu chỉnh Jacobian cho log-probability của chính
+sách affine, cơ chế co giãn action để tuân thủ giới hạn diện tích, cơ chế tự
+động điều chỉnh entropy temperature, và sự khác biệt giữa lợi nhuận kế toán với
+các penalty chỉ dùng để định hướng quá trình huấn luyện.
 
-## Evidence and Figures
+## Bằng chứng và hình minh họa
 
-The methodology uses the MDP architecture figure. The experimental-selection
-subsection uses the service–inventory frontier and residual-weight ablation
-figures to explain why coverage 1.20 and residual weight 0.10 were selected.
-The invalid before/after figure is not included or cited.
+Phần phương pháp sử dụng hình kiến trúc MDP. Phần lựa chọn siêu tham số sử dụng
+hình biên service–inventory và hình ablation trọng số residual để giải thích vì
+sao hệ số bao phủ 1,20 và trọng số residual 0,10 được chọn. Hình before/after
+không được đưa vào hoặc trích dẫn trong paper.
 
-The main result table reports only the current 52-week, seed-42 terminal
-evaluation:
+Bảng kết quả chính chỉ báo cáo đánh giá cuối trong 52 tuần với seed 42:
 
-- mean weekly shortage: 4.75 units;
-- total shortage: 247 units;
-- P95 weekly shortage: 11.30 units;
-- maximum weekly shortage: 121 units;
-- weeks above the 30-unit target: 2/52;
-- aggregate fill rate: 97.81%;
-- lowest per-SKU fill rate: 96.46%;
-- mean end-of-week inventory: 1.60 days;
-- accounting profit: 72.216 billion VND;
-- peak footprint after a delivery: below the hard 25 m² limit.
+| Chỉ số | Kết quả hiện tại |
+|---|---:|
+| Thiếu hụt trung bình mỗi tuần | 4,75 đơn vị |
+| Tổng thiếu hụt trong 52 tuần | 247 đơn vị |
+| P95 thiếu hụt hằng tuần | 11,30 đơn vị |
+| Thiếu hụt lớn nhất trong một tuần | 121 đơn vị |
+| Số tuần vượt ngưỡng thiếu hụt 30 đơn vị | 2/52 |
+| Fill rate tổng thể | 97,81% |
+| Fill rate thấp nhất trong các SKU | 96,46% |
+| Tồn kho trung bình cuối tuần | 1,60 ngày nhu cầu |
+| Lợi nhuận kế toán trong 52 tuần | 72,216 tỷ VND |
+| Diện tích cực đại sau mỗi lần giao hàng | Nhỏ hơn giới hạn cứng 25 m² |
 
-The text must not invent missing comparisons, uncertainty intervals, or
-causal attribution that the experiment does not establish.
+Nội dung không được tự tạo các phép so sánh còn thiếu, khoảng bất định hoặc
+tuyên bố quan hệ nhân quả mà thí nghiệm chưa chứng minh.
 
-## Experimental Protocol and Claim Boundaries
+## Quy trình thí nghiệm và giới hạn của các tuyên bố
 
-Describe the implemented separation between training seed 7201, checkpoint
-selection seeds 7301–7303, and terminal reporting seed 42. Clearly distinguish
-this protocol from earlier experimental generations. Coverage selection seeds
-6201–6205 and residual-weight validation seeds 7601–7605 are documented as
-empirical tuning pools, not external constants.
+Mô tả rõ cách triển khai hiện tại tách seed huấn luyện 7201, các seed chọn
+checkpoint 7301–7303 và seed báo cáo kết quả cuối 42. Phân biệt quy trình này
+với các thế hệ thí nghiệm trước. Các seed 6201–6205 dùng để chọn hệ số bao phủ
+và các seed 7601–7605 dùng để kiểm định trọng số residual phải được mô tả là
+các tập seed hiệu chỉnh thực nghiệm, không phải hằng số lấy từ tài liệu bên
+ngoài.
 
-Frame the terminal result as a single held-out scenario, not a multi-seed
-confidence estimate. The paper must explicitly disclose that two weeks exceed
-the shortage threshold, one action is reused for both delivery events,
-economic inputs include modeling assumptions, the forecast is noisy, and the
-365-day environment is evaluated over 52 complete weeks.
+Kết quả cuối phải được trình bày như một kịch bản holdout duy nhất, không phải
+ước lượng độ tin cậy đa seed. Paper phải nêu rõ hai tuần vẫn vượt ngưỡng thiếu
+hụt; cùng một action được dùng cho cả hai lần giao hàng; một số đầu vào kinh tế
+là giả định mô hình; forecast là tín hiệu có nhiễu; và môi trường 365 ngày được
+đánh giá trên 52 tuần hoàn chỉnh.
 
-## Validation
+## Kiểm chứng sau chỉnh sửa
 
-After editing, validate that:
+Sau khi cập nhật paper, cần kiểm tra:
 
-1. no substantive old metric or single-delivery claim remains;
-2. all algorithm names consistently use Residual SAC-AutoAlpha;
-3. figure paths exist and the before/after figure is absent from the source;
-4. numerical claims agree with `ref_paper_v4_update.md`;
-5. LaTeX cross-references and bibliography keys resolve;
-6. the document compiles successfully with the repository's available LaTeX
-   toolchain, or any unavailable toolchain is reported explicitly.
+1. Không còn số liệu cũ hoặc tuyên bố thực chất nào dựa trên thiết kế một lần
+   giao hàng.
+2. Tên thuật toán được dùng nhất quán là Residual SAC-AutoAlpha.
+3. Các đường dẫn hình tồn tại và hình before/after không xuất hiện trong mã
+   nguồn LaTeX.
+4. Các số liệu khớp với `ref_paper_v4_update.md`.
+5. Các tham chiếu chéo LaTeX và khóa bibliography được phân giải đúng.
+6. Tài liệu biên dịch thành công bằng bộ công cụ LaTeX có sẵn trong repository;
+   nếu không có bộ công cụ phù hợp thì phải báo rõ giới hạn này.
 
-## Out of Scope
+## Ngoài phạm vi
 
-Do not regenerate experiments, alter model code, fabricate multi-seed
-statistics, add unsupported baselines, or edit the supplied figure images.
+Không chạy lại thí nghiệm, không thay đổi mã nguồn mô hình, không tạo số liệu
+đa seed không có thật, không bổ sung baseline chưa được kiểm chứng và không
+chỉnh sửa các tệp hình đã cung cấp.
