@@ -9,35 +9,22 @@
 %% All additional figures and files should be attached             %%
 %% separately and not embedded in the \TeX\ document itself.       %%
 %%                                                                 %%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-% This report evaluates Random, Q-learning, SARSA, and SAC-AutoAlpha (legacy
-% class/checkpoint name: SAC-AlphaLR) in a single-echelon, five-category
-% retail inventory environment under a common 52-week, seed-42 protocol.
-% See Section~\ref{subsec:protocol} for scope and limits.
+\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}
 
-\documentclass[pdflatex,sn-mathphys-num]{sn-jnl}% Math and Physical Sciences Numbered Reference Style
-
-%%%% Standard Packages
-\usepackage{graphicx}%
-\usepackage{multirow}%
-\usepackage{amsmath,amssymb,amsfonts}%
-\usepackage[title]{appendix}%
-\usepackage{xcolor}%
-\usepackage{textcomp}%
-\usepackage{manyfoot}%
-\usepackage{booktabs}%
-\usepackage{algorithm}%
-\usepackage{algorithmicx}%
-\usepackage{algpseudocode}%
-%%%%
-
-% [AI-EDITED 2026-07-17] The sn-jnl class ships with a narrow "smallcond"
-% text block (131mm wide on an A4 page) and a large reserved footskip,
-% which leaves wide empty side margins and a big gap below the text before
-% the footer. Overriding geometry here switches to standard A4 print
-% margins with a normal-width text block.
-\usepackage{geometry}%
+\usepackage{graphicx}
+\usepackage{multirow}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage[title]{appendix}
+\usepackage{xcolor}
+\usepackage{textcomp}
+\usepackage{manyfoot}
+\usepackage{booktabs}
+\usepackage{algorithm}
+\usepackage{algorithmicx}
+\usepackage{algpseudocode}
+\usepackage{geometry}
 \geometry{
     a4paper,
     top=25mm,
@@ -47,17 +34,13 @@
     headheight=14pt,
     headsep=10mm,
     footskip=15mm
-}%
+}
 
 \raggedbottom
 
 \begin{document}
 
-\title[RL for Weekly Retail Inventory Replenishment]{Reinforcement Learning for Weekly Retail Inventory Replenishment: Evaluating a Soft Actor-Critic Policy}
-% [AI-EDITED] Title updated to match the single-echelon, four-policy study
-% actually implemented and evaluated (was "Reinforcement Learning with
-% Inventory Inbounding"). Please confirm this is the title you want to
-% submit under.
+\title[Residual SAC for Fixed-Capacity Replenishment]{Residual Soft Actor-Critic for Fixed-Capacity Retail Replenishment with Two Weekly Deliveries}
 
 \author*[1]{\fnm{Hao Trieu Quoc} \sur{}}\email{haotqse180011@fpt.edu.vn}
 
@@ -69,361 +52,232 @@
 
 \affil*[1]{\orgdiv{Department of Artificial Intelligence}, \orgname{FPT University}, \orgaddress{\street{7 D1 Street, Tang Nhon Phu}, \city{Ho Chi Minh City}, \postcode{700000}, \country{Vietnam}}}
 
-% [AI-EDITED] Abstract rewritten from placeholder text to match paper_v1.md.
-\abstract{Retail inventory replenishment is a sequential decision problem in which a store manager must decide, week by week, how many units of each product to order from a distributor while trading off procurement, storage, and shortage costs under a hard retail-floor-space constraint. This paper formulates a five-category Apple retail store as a Markov Decision Process (MDP) and compares four policies under a single controlled 52-week, seed-42 scenario with day-of-week, seasonal, and holiday demand effects: Random, Q-learning, SARSA, and Soft Actor-Critic with automatic entropy-temperature tuning, denoted SAC-AutoAlpha (legacy class/checkpoint name: SAC-AlphaLR). In this seed-42 scenario, SAC-AutoAlpha achieves the lowest total cost (155.71 billion VND), highest revenue (185.05 billion VND), highest estimated profit (29.35 billion VND), and fewest stockout units (2{,}013). Relative to Random, it reduces total cost by 14.7\%, reduces stockout units by 59.9\%, and raises service level from 55.5\% to 82.1\%. Q-learning and SARSA also achieve positive estimated profit, but are inferior to SAC-AutoAlpha on all reported business and service metrics. Stockouts nevertheless occur in 41 of 52 weeks under SAC-AutoAlpha and average floor-space utilization reaches 93.01\%, so the positive-profit result does not mean that the capacity-constrained service problem has been fully solved. Because all four policies are compared on one demand realization and because checkpoint selection and final reporting currently reuse the same evaluation seed (Section~\ref{subsec:protocol}), these results should be read as a single-scenario case study rather than a seed-robust ranking; Section~\ref{sec7} specifies the multi-seed, ablation, and baseline extensions needed before a stronger claim can be made.}
+\abstract{Retail replenishment under a hard floor-space limit is both a sequential control problem and a physical throughput problem. In the studied five-category consumer-electronics store, a representative seven-day demand volume requires approximately 50.39~m$^2$ of goods, whereas the available retail area is fixed at 25~m$^2$. A single weekly delivery is therefore structurally unable to provide full-week coverage. This paper formulates the system as a 26-dimensional-state, five-dimensional-action Markov Decision Process and introduces two replenishment events, on days 0 and 3, so that mid-week sales release capacity for a second delivery. Control is provided by Residual Soft Actor-Critic with automatic entropy-temperature tuning (Residual SAC-AutoAlpha), which blends a service-coverage baseline with a learned continuous actor. The coverage factor and residual weight are selected on distinct validation seeds, checkpoint selection uses three further seeds, and the final 52-week evaluation is conducted on held-out seed 42. In that terminal scenario, the policy attains a 97.81\% aggregate fill rate, a 96.46\% minimum per-SKU fill rate, mean and P95 weekly shortages of 4.75 and 11.30 units, mean end-of-week inventory of 1.60 demand-days, and accounting profit of 72.216 billion VND while respecting the 25~m$^2$ hard constraint. Two of 52 weeks nevertheless exceed the 30-unit shortage threshold, with a maximum of 121 units. The findings therefore demonstrate a service-feasible operating point for the reported holdout scenario, rather than a multi-seed guarantee or elimination of tail risk.}
 
-\keywords{Reinforcement Learning, Inventory Management, Retail Replenishment, Soft Actor-Critic, Markov Decision Process, Capacity Constraint}
-% [AI-EDITED] Keywords filled in (was "keyword1, Keyword2, Keyword3, Keyword4").
+\keywords{Residual reinforcement learning, Soft Actor-Critic, Inventory management, Retail replenishment, Capacity constraint, Service level}
 
 \maketitle
 
-\section{Introduction}\label{sec1}
-% [AI-EDITED] Rewritten to describe the single-echelon, floor-space-constrained
-% retail system with four compared policies, replacing the previous
-% two-echelon / PPO framing.
+\section{Introduction}\label{sec:introduction}
 
-Inventory management requires a retailer to balance product availability against procurement, holding, and shortage costs. Fixed inventory rules remain useful baselines, but they become difficult to tune when demand changes with seasonality and promotions and when several products compete for the same physical retail space.
+Retail inventory control must balance product availability against procurement, holding, and shortage costs. The problem becomes more difficult when heterogeneous products compete for one hard physical capacity and demand changes with weekdays, seasons, and commercial events. Reinforcement learning (RL) offers a natural formulation because replenishment decisions affect both current service and the inventory available in future periods~\cite{bib22}. Continuous-control methods such as Soft Actor-Critic (SAC) are especially relevant when several order quantities must be selected jointly~\cite{bib3,bib23}.
 
-Reinforcement Learning (RL) provides a data-driven alternative in which an agent learns replenishment decisions through interaction with the environment~\cite{bib22}. This project uses Soft Actor-Critic (SAC)~\cite{bib3} with automatic entropy-temperature tuning~\cite{bib23}, which is suitable for the continuous, five-product order-quantity action space.
+The system studied here represents a single consumer-electronics store in Vietnam managing five product categories: iPhone, iPad, MacBook, Apple Watch, and AirPods. The store has a non-negotiable floor-space capacity of 25~m$^2$. At the measured demand scale, approximately 50.39~m$^2$ of incoming goods would be required to cover a representative seven-day period. This mismatch cannot be corrected by longer training or reward tuning because it is a physical throughput limitation. The operational design must first create another opportunity to replenish after sales release occupied space.
 
-The project is methodologically motivated by Zhang, He, and Zheng's SAC-based replenishment study~\cite{bib1}. It adapts their overall MDP and continuous-control idea to a single retail store with five product categories and a shared floor-space constraint. Broader evidence that DRL can be useful for inventory problems is summarized by Gijsbrechts et al.~\cite{bib5}.
+Accordingly, this work uses two delivery events per week, on days 0 and 3. The same five-dimensional action is interpreted as a per-delivery replenishment proposal and is passed through the capacity constraint at each event. On top of this structural redesign, the controller uses a service-oriented baseline as an action prior and learns a bounded residual with SAC. This separation assigns distinct roles to engineering and learning: the delivery schedule addresses physical feasibility, the baseline keeps decisions near a service-feasible region, and the learned component adjusts the joint five-product action.
 
-The case study focuses on specialty electronics retail, where demand varies by day, season, and holiday, while all products share a limited retail floor. Ordering more of one product leaves less capacity for the others, so the replenishment decision must be made jointly across categories.
-
-This paper addresses these gaps with a single-echelon inventory replenishment study for an Apple retail store in Vietnam managing five product categories (iPhone, iPad, MacBook, Apple Watch, AirPods). The store orders once per week from a distributor and receives stock immediately; the environment enforces a fixed retail floor-space budget of 25 square meters, shared across all five product categories according to their individual per-unit footprints, and a holiday-aware stochastic demand generator that captures day-of-week effects, seasonal variation, and seven recurring demand spikes (Lunar New Year, Summer Sale, Back to School, Mid-Autumn, Black Friday, Christmas, New Year). Replenishment is formulated as an MDP, and Random, Q-learning, SARSA, and SAC-AutoAlpha are evaluated under the same 52-week, seed-42 scenario.
-
-The main contributions of this work are summarized as follows:
+The contributions of this paper are:
 
 \begin{itemize}
-    \item A single-echelon retail inventory simulation environment constrained by a shared retail floor-space budget (in square meters) across five product categories with distinct per-unit footprints and cost structures.
-
-    \item A holiday-aware stochastic demand generation model that captures day-of-week effects, seasonal variation, and seven recurring promotional/holiday events characteristic of consumer electronics retail.
-
-    \item An MDP formulation of weekly retail replenishment under this shared floor-space constraint, with a 26-dimensional state and a 5-dimensional order-quantity action.
-
-    \item A controlled 52-week, seed-42 comparison of Random, Q-learning, SARSA, and SAC-AutoAlpha, reporting cost, revenue, profit, shortages, fulfilled demand, and floor-space utilization.
-
-    \item Transparent verification of all reported hyperparameters, cost structures, and results against the running implementation, with explicit documentation of the points where an earlier design draft of this project diverged from the final, tuned system.
+    \item a fixed-capacity weekly retail MDP with two within-week replenishment events and an auditable requested-to-executed action transformation;
+    \item a Residual SAC-AutoAlpha policy that combines a demand-coverage prior with a learned continuous correction, including the required log-probability adjustment;
+    \item a seed-separated selection procedure for the coverage factor, residual weight, and training checkpoint; and
+    \item an evaluation that jointly reports service, tail shortage, inventory, profit, and hard-capacity compliance while retaining the limitations of a single terminal holdout scenario.
 \end{itemize}
 
-The remainder of this paper is organized as follows. Section~\ref{sec2} reviews related work in classical and RL-based inventory management. Section~\ref{sec3} presents the environment, demand model, and Soft Actor-Critic policy. Section~\ref{sec4} describes the experimental setup. Section~\ref{sec5} reports the results. Section~\ref{sec6} discusses the findings. Section~\ref{sec7} discusses limitations and future work. Section~\ref{sec8} concludes the paper.
+Section~\ref{sec:related} reviews relevant inventory and RL work. Section~\ref{sec:method} defines the MDP, delivery mechanism, reward, and residual policy. Section~\ref{sec:experiment} describes validation and evaluation. Sections~\ref{sec:results} and~\ref{sec:discussion} present and interpret the findings, followed by limitations in Section~\ref{sec:limitations} and conclusions in Section~\ref{sec:conclusion}.
 
-\section{Literature Review}\label{sec2}
+\section{Related Work}\label{sec:related}
 
-\subsection{Classical Inventory Management}
+Classical replenishment policies provide interpretable rules for balancing order and holding costs, but a shared hard-capacity constraint couples the five product decisions and makes independently tuned rules less reliable. The coupling is operational: requesting more of one product reduces the floor space available to every other product in the same delivery.
 
-Classical reorder rules are useful when demand and capacity are simple enough to model explicitly. This project instead considers five products sharing one retail floor, together with stochastic seasonal and holiday demand. These features motivate an adaptive policy rather than a manually tuned rule for each product.
+RL expresses this interaction as an MDP and optimizes discounted return under stochastic transitions~\cite{bib22}. Deep RL has been applied to inventory problems in which nonlinear costs and constraints make fixed policies difficult to tune~\cite{bib5}. The present work is methodologically motivated by the SAC-based replenishment formulation of Zhang, He, and Zheng~\cite{bib1}, but it studies a single-echelon, five-category retail setting rather than their multi-echelon, single-product setting.
 
-\subsection{Reinforcement Learning for Inventory Management}
+SAC learns a stochastic continuous policy using an entropy-regularized objective and twin critics~\cite{bib3}. Automatic temperature tuning adapts the entropy coefficient instead of fixing it manually~\cite{bib23}. In this paper, ``AutoAlpha'' refers only to this learned entropy temperature; the actor, critic, and temperature optimizers all retain fixed learning rates. The deployed policy is not vanilla SAC: it is a residual policy built around an explicit service-coverage prior. This naming distinction is material because the prior supplies 90\% of the final blended proposal at the selected operating point.
 
-Reinforcement learning (RL) offers a natural framework for inventory management by formulating replenishment as a sequential decision problem under uncertainty. The inventory manager (agent) observes the current state (inventory levels, demand forecast, cost structure), takes an action (order quantities), and receives a reward representing scaled weekly accounting profit, combining fulfilled-sales revenue with procurement, holding, and shortage costs (i.e., Revenue $-$ Procurement Cost $-$ Storage Cost $-$ Shortage Cost). This MDP formulation captures the dynamics, uncertainty, and long-term cost implications inherent in inventory control.
+\section{Methodology}\label{sec:method}
 
-Sutton and Barto~\cite{bib22} provide the RL foundation used to formulate weekly replenishment as an MDP. This project uses Soft Actor-Critic (SAC)~\cite{bib3}, with automatic entropy-temperature tuning~\cite{bib23}, because its continuous actor can choose order quantities jointly for all five products.
+\subsection{Weekly Markov Decision Process}\label{subsec:mdp}
 
-Gijsbrechts et al.~\cite{bib5} show that DRL can be effective for inventory problems whose constraints make fixed policies difficult to apply. Their work provides broad inventory-management context for the present course project.
+The replenishment problem is represented by the tuple
+$\mathcal{M}=(\mathcal{S},\mathcal{A},P,R,\gamma)$, where one decision epoch corresponds to one seven-day period and $\gamma=0.99$. The transition combines the deterministic delivery and capacity rules with stochastic daily demand. Figure~\ref{fig:mdp} summarizes the closed loop.
 
-\subsection{Deep Reinforcement Learning for Multi-Echelon and Constrained Inventory Systems}
-
-Zhang, He, and Zheng~\cite{bib1} are the direct source for the project's original SAC-AlphaLR naming and its MDP-based replenishment framing. Their study considers a multi-echelon, single-product FMCG system; this project adapts the idea to one retail store with five categories and a shared floor-space constraint. The evaluated implementation uses SAC's adaptive temperature only, not the adaptive learning-rate mechanism described by Zhang et al.; consequently, this paper refers to the method as SAC-AutoAlpha throughout, and retains the legacy name SAC-AlphaLR only when referring to the source-code class and checkpoint file.
-
-\section{Methodology}\label{sec3}
-% [AI-EDITED] New section, written from scratch based on the verified
-% implementation (env/weekly_retail_env.py, config.py,
-% env/advanced_demand_generator.py) and paper_v1.md Section 3. Replaces the
-% Springer template's placeholder "Results"/example-heading sections.
-
-\subsection{Environment and MDP Formulation}\label{subsec:mdp}
-
-The environment, \texttt{WeeklyRetailEnv}, models a single Apple retail store in Vietnam that orders from a distributor once per week and receives stock immediately (zero lead time). Between orders, daily demand depletes inventory over a 7-day cycle. An episode simulates 365 days, so the agent makes at most 52 ordering decisions per episode. The problem is formulated as an MDP $(\mathcal{S}, \mathcal{A}, P, R, \gamma)$ with $\gamma = 0.99$, where one decision step corresponds to one week.
-
-\subsubsection{State Space}
-
-The state $s \in \mathbb{R}^{26}$ concatenates five 5-dimensional sub-vectors (one entry per product: iPhone, iPad, MacBook, Apple Watch, AirPods) and one scalar:
-\begin{equation}
-s = \Big[\, \tfrac{\mathrm{inv}}{\mathrm{MAX\_CAPACITY}},\ \tfrac{\mathrm{forecast}}{100},\ \tfrac{\mathrm{PURCHASE\_COST}}{5\times 10^{7}},\ \tfrac{\mathrm{STORAGE\_COST}}{5\times 10^{4}},\ \tfrac{\mathrm{SHORTAGE\_PENALTY}}{10^{6}},\ \tfrac{\mathrm{day}}{365} \,\Big]
-\label{eq:state}
-\end{equation}
-where $\mathrm{inv}$ is current on-hand inventory, $\mathrm{forecast}$ is the sum of expected demand over the next 7 days, and the three cost sub-vectors are normalized, near-constant product attributes that let the same network/table generalize across products with different unit economics. The total dimensionality is $5+5+5+5+5+1 = 26$.
-
-\subsubsection{Action Space}
-
-The action $a \in \mathbb{R}^{5}_{\ge 0}$ is a vector of order quantities, one per product, bounded by a per-product weekly cap (Table~\ref{tab:action}). Orders are rounded to the nearest integer and clipped to $[0, \mathrm{MAX\_ORDER}_i]$.
-
-\begin{table}[h]
-\caption{Action space bounds and initial state per product}\label{tab:action}
-\begin{tabular}{@{}lccc@{}}
-\toprule
-Product & MAX\_ORDER (units/wk) & Initial inventory & Max capacity \\
-\midrule
-iPhone       & 50  & 50 & 80  \\
-iPad         & 35  & 30 & 60  \\
-MacBook      & 20  & 15 & 35  \\
-Apple Watch  & 35  & 30 & 60  \\
-AirPods      & 100 & 80 & 150 \\
-\botrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Floor-Space Constraint}\label{subsec:floor}
-
-Each product occupies a fixed footprint $f_i$ (m$^2$/unit; Table~\ref{tab:footprint}), and the store has a fixed total retail floor area $A = 25.0$ m$^2$. At the start of an episode, initial inventory already occupies approximately 21.85 m$^2$ (about 87\% of capacity), representing a small Apple-reseller backroom that starts nearly full. Before an order is applied, if the current occupied area plus the requested order's area would exceed $A$, the entire order vector is scaled down proportionally:
-\begin{equation}
-\text{if } \textstyle\sum_i (\mathrm{inv}_i + o_i) f_i > A: \quad
-o_i \leftarrow \left\lfloor o_i \cdot \frac{\max(A - \sum_i \mathrm{inv}_i f_i,\ 0)}{\max(\sum_i o_i f_i,\ 1)} \right\rfloor \quad \forall i
-\label{eq:floor}
-\end{equation}
-This is a binding constraint that couples all five products: ordering more of one product directly reduces the floor budget available to the others, so the environment does not decompose into five independent single-product inventory problems.
-
-\textbf{Confirmed limitation: requested action versus executed action.} Eq.~\eqref{eq:floor} shows that the order vector $o$ produced by a policy (the \emph{requested action}) is not necessarily the order vector applied to inventory (the \emph{executed action}): whenever the combined footprint would exceed $A$, $o$ is scaled down after the policy has already chosen it. The verified environment step function returns only the final, post-scaling order quantity in its info output; it does not separately expose the pre-scaling requested action or the scale factor applied. This matters for SAC-AutoAlpha's off-policy training: whatever is written to the replay buffer as ``the action taken'' for a transition is what the critic learns to associate with the observed reward. If the raw, pre-scaling policy output were stored instead of the executed, capacity-scaled order, the critic would learn an incorrect state-action-reward relationship for every transition in which scaling occurred -- and Table~\ref{tab:service} shows floor utilization is at or near capacity in a majority of weeks for all three learned policies, so scaling is common rather than rare. The results in this paper are not known to be invalidated by this gap, because the executed action is what the environment actually returns and rewards are computed consistently with it; however, whether the requested or the executed action is what gets stored in the replay buffer has not been independently verified against the training code path, and the info dictionary does not currently make this auditable after the fact. Section~\ref{sec7} lists exposing \texttt{requested\_action}, \texttt{executed\_action}, and \texttt{capacity\_scale} as separate, explicit fields as a required instrumentation fix.
-
-\begin{table}[h]
-\caption{Per-product footprint and daily storage cost}\label{tab:footprint}
-\begin{tabular}{@{}lcc@{}}
-\toprule
-Product & Footprint (m$^2$/unit) & Storage cost (VND/unit/day) \\
-\midrule
-iPhone       & 0.10 & 25{,}000 \\
-iPad         & 0.20 & 18{,}000 \\
-MacBook      & 0.35 & 35{,}000 \\
-Apple Watch  & 0.08 & 10{,}000 \\
-AirPods      & 0.04 & 4{,}000  \\
-\botrule
-\end{tabular}
-\end{table}
-
-\subsubsection{Reward Function}
-
-The training reward is weekly accounting profit, scaled by a fixed factor $\lambda = 10^{-8}$:
-\begin{equation}
-r = \big(R - C_{\mathrm{proc}} - C_{\mathrm{store}} - C_{\mathrm{short}}\big) \cdot \lambda
-\label{eq:reward}
-\end{equation}
-where $R$ is revenue from fulfilled demand. Retail price is $1.40$ times the purchase price for every product. Procurement cost is charged once, at the start of the week, for units actually received:
-\begin{equation}
-C_{\mathrm{proc}} = \textstyle\sum_i o_i \cdot p_i \cdot w_i
-\label{eq:procurement}
-\end{equation}
-where $p_i$ is the unit purchase price and $w_i \in [0.80, 1.00]$ is a per-product procurement-discount weight reflecting supplier terms. Storage cost is charged once per day over the 7-day week, on end-of-day inventory, at 0.1\% of unit purchase price per day (Table~\ref{tab:footprint}):
-\begin{equation}
-C_{\mathrm{store}} = \textstyle\sum_{d=1}^{7} \sum_i \mathrm{inv}_i(d) \cdot h_i
-\label{eq:storage}
-\end{equation}
-Shortage cost is charged per unit of unmet daily demand at $1.5\times$ the unit purchase price:
-\begin{equation}
-C_{\mathrm{short}} = \textstyle\sum_{d=1}^{7} \sum_i \max\!\big(D_i(d) - \min(\mathrm{inv}_i(d), D_i(d)),\ 0\big) \cdot \pi_i, \qquad \pi_i = 1.5\, p_i
-\label{eq:shortage}
-\end{equation}
-The $1.5\times$ multiplier is the value enforced by the running environment. An earlier design draft of this project specified a $10\times$ multiplier as the intended shortage penalty; the implementation was tuned down to $1.5\times$ during development, and this paper reports the value actually used by the simulation, since the interpretation of the results (Section~\ref{sec6}) depends on it.
-
-\subsection{Reference-Based and Configurable Parameterization}\label{subsec:configuration}
-
-The environment design follows Zhang, He, and Zheng's ME-DRFO formulation~\cite{bib1} at the methodological level: replenishment is represented as an MDP, the reward combines procurement, holding, and shortage costs, and a continuous SAC policy is used to balance exploration and exploitation. The present work does not treat the numerical values in Tables~\ref{tab:action}--\ref{tab:holiday} as universal constants inherited from that study. Zhang et al. study a single-product, multi-echelon FMCG system, whereas the present case study represents five consumer-electronics categories sharing one retail floor-space constraint. Directly copying their product-specific demand and cost values would therefore be inappropriate.
-
-To distinguish the reusable method from the application scenario, the implementation separates three parameter groups. First, algorithmic settings such as $\gamma$, $\tau$, target entropy, and optimizer settings define the learning procedure and are reported for reproducibility. Second, structural choices adapted from~\cite{bib1}, including the MDP formulation, continuous replenishment actions, and the accounting-profit-based reward that combines fulfilled-sales revenue with procurement cost, storage cost, and shortage cost (Eq.~\ref{eq:reward}), define the model. Third, business inputs---baseline demand, holiday multipliers, prices, storage costs, shortage penalties, order bounds, initial inventory, and floor capacity---define a configurable Apple-retail scenario rather than the algorithm itself. These inputs are exposed through the project configuration and demand-generator interfaces, allowing the same trained policy and evaluation pipeline to be exercised under alternative demand conditions. The results in this paper, however, are restricted to the explicitly reported 52-week, seed-42 scenario; no unreported scenario analysis is used to support the conclusions.
-
-\subsection{Demand Generation}\label{subsec:demand}
-
-Daily demand is produced by a holiday-aware generator that multiplies a day-of-week factor, a slow seasonal sine wave, and a holiday multiplier, then adds Gaussian noise with standard deviation $\max(0.15\,\mu, 1)$. Baseline daily demand $\mu$ is 6, 4, 2, 4, and 10 units/day for iPhone, iPad, MacBook, Apple Watch, and AirPods respectively. Seven recurring holiday windows are defined (Table~\ref{tab:holiday}), each with a per-product peak multiplier and a window width (days) over which a cosine-shaped intensity curve ramps the multiplier up and back down.
-
-\begin{table}[h]
-\caption{Holiday demand windows and per-product peak multipliers}\label{tab:holiday}
-\begin{tabular}{@{}lccccccc@{}}
-\toprule
-Holiday & Day & Width (d) & iPhone & iPad & MacBook & Watch & AirPods \\
-\midrule
-Tet Nguyen Dan  & 20  & 14 & 3.5 & 2.5 & 2.0 & 3.0 & 3.5 \\
-Summer Sale     & 100 & 7  & 1.5 & 1.5 & 1.3 & 1.3 & 1.5 \\
-Back to School  & 200 & 21 & 1.3 & 3.5 & 3.0 & 1.2 & 1.3 \\
-Mid-Autumn      & 250 & 5  & 1.2 & 1.3 & 1.0 & 2.0 & 1.5 \\
-Black Friday    & 300 & 7  & 3.0 & 2.5 & 2.0 & 2.0 & 3.0 \\
-Christmas       & 330 & 14 & 2.0 & 2.0 & 1.3 & 2.5 & 3.5 \\
-New Year        & 355 & 10 & 2.0 & 1.8 & 1.5 & 2.0 & 2.5 \\
-\botrule
-\end{tabular}
-\end{table}
-
-Figure~\ref{fig:demand-profile} visualizes the seeded daily demand realization used for the default evaluation. The series retains stochastic day-to-day variation while showing the event-driven peaks generated by the configurable holiday calendar.
-
-\begin{figure*}[t]
+\begin{figure}[ht]
 \centering
-\includegraphics[width=0.92\textwidth]{figures/annual_demand_profile.pdf}
-\caption{Seeded daily demand profile for the five product categories. All labels are reported in English; vertical reference lines indicate configured holiday centers.}\label{fig:demand-profile}
-\end{figure*}
-
-\subsection{Ordering Policies}\label{sec:algorithms}
-
-Four policies are evaluated on the same environment: a random baseline, tabular Q-learning, tabular SARSA, and SAC-AutoAlpha.
-
-\subsubsection{Random Baseline}
-
-Each week, the random policy draws an independent order quantity for each product from a continuous uniform distribution over $[0, \mathrm{MAX\_ORDER}_i]$. It has no learning component and provides a common stochastic reference.
-
-\subsubsection{Q-Learning and SARSA}
-
-Q-learning and SARSA use one tabular action-value function per product. Inventory is discretized into 14 buckets, demand forecasts into 10 product-specific buckets, and each product has a small discrete set of valid order quantities. Both agents use learning rate $0.1$, discount factor $\gamma=0.99$, and an $\varepsilon$-greedy policy with $\varepsilon$ decaying from $0.3$ to $0.01$ by a factor of $0.995$ after each episode. Q-learning uses the maximum next-state action value, whereas SARSA uses the value of the action selected by its current policy. Both are trained for 200 episodes before their deterministic evaluation rollout.
-
-\begin{algorithm}[h]
-\caption{Per-product tabular update (Q-learning shown; SARSA replaces $\max_{a'} Q_i$ with $Q_i(s_i', a_i')$ for the action $a_i'$ actually selected next)}\label{alg:qlearning}
-\begin{algorithmic}[1]
-\For{episode $= 1, \dots, 200$}
-    \State Reset environment; observe per-product discretized state $s_i$ for $i = 1,\dots,5$
-    \For{week $= 1, \dots, 52$}
-        \For{product $i = 1, \dots, 5$}
-            \State With probability $\varepsilon$: pick $a_i$ uniformly at random from the discrete order grid
-            \State Otherwise: $a_i \leftarrow \arg\max_{a} Q_i(s_i, a)$
-        \EndFor
-        \State Apply joint action $(a_1,\dots,a_5)$ to \texttt{WeeklyRetailEnv}; observe global weekly reward $r$ and next states $s_i'$
-        \For{product $i = 1, \dots, 5$}
-            \State $\mathrm{td\_target} \leftarrow r / 5 + \gamma \cdot \max_{a'} Q_i(s_i', a')$ \Comment{same $r/5$ term for every product}
-            \State $Q_i(s_i, a_i) \leftarrow Q_i(s_i, a_i) + 0.1 \cdot \big(\mathrm{td\_target} - Q_i(s_i, a_i)\big)$
-        \EndFor
-    \EndFor
-    \State $\varepsilon \leftarrow \max(0.01,\ 0.995 \cdot \varepsilon)$
-\EndFor
-\end{algorithmic}
-\end{algorithm}
-
-\textbf{Confirmed limitation: equal-split reward attribution.} Line 9 of Algorithm~\ref{alg:qlearning} is not a simplification for presentation; it is the exact update rule implemented for both Q-learning and SARSA (\texttt{td\_target = reward / 5 + ...}). Every one of the five per-product tables is trained on the same global weekly profit, divided equally by 5, regardless of which product actually drove that profit up or down. Because the five products compete for one shared floor-space budget (Section~\ref{subsec:floor}), this creates a credit-assignment problem: if AirPods are ordered in excess, floor capacity is consumed, the environment's capacity-scaling rule (Eq.~\ref{eq:floor}) proportionally shrinks every product's executed order including iPhone's, iPhone revenue falls, the global reward falls, and the iPhone table is penalized by $r/5$ even though the excess order came from AirPods. The iPhone table cannot distinguish ``I chose badly'' from ``AirPods consumed my capacity,'' because both cases produce the same $r/5$ signal. This is a known limitation of the equal-split heuristic and is reported here rather than left implicit; SAC-AutoAlpha does not have this problem because its single critic conditions on the full joint state and action (Section~\ref{subsec:sac}), so it can in principle attribute the shared capacity cost correctly. A per-product reward decomposition ($\text{reward}_i = \text{revenue}_i - \text{procurement}_i - \text{storage}_i - \text{shortage}_i$, plus a shared capacity penalty term) is the natural fix and is listed as required future work in Section~\ref{sec7}.
-
-\subsubsection{SAC-AutoAlpha}\label{subsec:sac}
-
-The deep actor-critic agent is denoted SAC-AutoAlpha in this paper. The verified implementation's source class and saved checkpoint file are both named \texttt{SACAlphaLR}, following the naming used by Zhang, He, and Zheng~\cite{bib1} for their adaptive-temperature, adaptive-learning-rate SAC variant; that legacy name is kept in the codebase only so that the existing checkpoint remains loadable, and is not used in the remainder of this paper. The policy follows the Soft Actor-Critic formulation of Haarnoja et al.~\cite{bib3} with the automatic temperature tuning introduced in~\cite{bib23}. \textbf{Note on naming:} unlike the SAC-AlphaLR of~\cite{bib1}, the implementation evaluated in this paper adapts only the temperature $\alpha$ (Eq.~\ref{eq:alpha}); it does not implement an adaptive learning-rate schedule. All three optimizers (actor, critic, and the temperature optimizer) use a fixed Adam learning rate of $3\times10^{-4}$ throughout training, with no scheduler. Only the ``Alpha'' (adaptive-temperature) component of the original SAC-AlphaLR name is implemented; the ``LR'' (adaptive-learning-rate) component is not, which is why this paper reports the method under the more accurate name SAC-AutoAlpha. The actor is a feedforward network (state dimension 26, two hidden layers of 256 units, ReLU activations) with separate mean and log-standard-deviation heads (log-std clamped to $[-20, 2]$) over the 5-dimensional action space; actions are sampled via the reparameterization trick, squashed through $\tanh$, and rescaled to $[0, \mathrm{MAX\_ORDER}]$. Two independent critic networks (input dimension $26+5=31$, two hidden layers of 256 units, scalar output) form a twin-Q critic used to mitigate value overestimation. The temperature $\alpha$ is optimized against a target entropy $\mathcal{H}_{\text{target}} = -5$ (the negative of the action dimensionality), via
-\begin{equation}
-\mathcal{L}(\alpha) = -\,\mathbb{E}\big[\log\alpha \cdot (\log \pi(a|s) + \mathcal{H}_{\text{target}})\big]
-\label{eq:alpha}
-\end{equation}
-All three networks (actor, critic, temperature) use Adam with learning rate $3\times 10^{-4}$; the discount factor is $\gamma=0.99$ and the target-network soft-update coefficient is $\tau = 0.005$. Gradient norms for the actor and critic losses are clipped to $1.0$. At evaluation time the agent acts deterministically ($\tanh$ of the mean, without sampling). The reported actor is the newly trained checkpoint supplied for the 52-week evaluation.
-
-\section{Experimental Setup}\label{sec4}
-% [AI-EDITED] New section, written from the actual evaluation protocol used
-% in dashboard/backend/rollout.py (matches paper_v1.md Section 5).
-
-\subsection{Evaluation Protocol and Metrics}\label{subsec:protocol}
-
-Random, Q-learning, SARSA, and SAC-AutoAlpha were each evaluated over 52 complete weekly decision cycles (364 simulated days) with demand seed 42, using the configuration in Section~\ref{subsec:demand}. The underlying 365-day environment is explicitly capped at 52 weeks in the evaluation pipeline so that a one-day partial 53rd week is not included. Q-learning and SARSA are each trained from scratch for 200 episodes using the same seed before evaluation; SAC-AutoAlpha loads the current \texttt{outputs/actor.pth} checkpoint and acts deterministically. The random policy requires no training. The file \texttt{outputs/eval\_results.json} is not used because it contains a legacy 365-day evaluation that is not compatible with this 52-week protocol.
-
-We report total cost, revenue, estimated profit ($\mathrm{revenue}-\mathrm{total\ cost}$), shortage cost, fulfilled units, stockout units, stockout weeks, and floor-space utilization. Service level is calculated as $\mathrm{fulfilled\ units}/(\mathrm{fulfilled\ units}+\mathrm{stockout\ units})$. All monetary results are simulated VND values, not observations from an operating retailer.
-
-\textbf{Confirmed limitation: validation and test seeds are not separated.} The training pipeline instantiates the evaluation environment with the same constant, \texttt{EVALUATION\_SEED}, in two places: once to select which checkpoint to save during training (periodic evaluation, every 10 episodes), and again to produce the final 52-week numbers reported in Section~\ref{sec5}. Because both uses share one seed, checkpoint selection and final reporting are computed on identical demand realizations, so the reported numbers cannot rule out that the selected checkpoint is specifically well-suited to seed 42 rather than to the demand distribution in general. A methodologically correct protocol would draw training seeds, validation seeds (used only for checkpoint selection), and test seeds (used only for the numbers reported in a paper, never seen during selection) from disjoint pools; Section~\ref{sec7} specifies this as a required, not optional, follow-up before the ranking in Table~\ref{tab:results} can be treated as seed-robust rather than scenario-specific.
-
-\subsection{Training and Reproducibility}\label{subsec:reproducibility}
-
-The implementation uses a replay buffer of 100{,}000 transitions, mini-batches of 256, and 10 warm-up episodes under the default training command; after warm-up, it performs one SAC update per weekly transition. Candidate checkpoints are evaluated every 10 episodes using seed 42 and the one with the lowest evaluation cost is saved. The exact command and training log for the supplied new checkpoint were not archived with the evaluation summary. Therefore, the paper reports verified code-level settings but does not claim a checkpoint-specific training duration; recording the command, software version, random seeds, and checkpoint hash is required for a fully reproducible future study.
-
-\clearpage
-\section{Results}\label{sec5}
-% [AI-EDITED] New section; all figures below are measured directly from a
-% real run of dashboard/backend/rollout.py, not illustrative placeholders.
-
-Table~\ref{tab:results} reports the comparable 52-week results. Cost, revenue, profit, and shortage cost are in billions of VND. ``Service level'' is fulfilled units divided by fulfilled plus stockout units.
-
-\begin{table}[h]
-\centering
-\caption{52-week evaluation results (VND, billions unless noted)}\label{tab:results}
-\begin{tabular}{@{}lrrrrrr@{}}
-\toprule
-Policy & Total cost & Revenue & Est. profit & Shortage cost & Stockout units & Units sold \\
-\midrule
-Random       & 182.64 & 120.84 & $-61.79$ & 104.67 & 5{,}022 & 6{,}253 \\
-Q-learning   & 161.00 & 172.08 & 11.07 & 47.90 & 2{,}449 & 8{,}820 \\
-SARSA        & 162.48 & 168.96 & 6.49 & 51.24 & 3{,}145 & 8{,}124 \\
-SAC-AutoAlpha  & \textbf{155.71} & \textbf{185.05} & \textbf{29.35} & \textbf{34.00} & \textbf{2{,}013} & \textbf{9{,}256} \\
-\botrule
-\end{tabular}
-\end{table}
-
-Reported monetary values are rounded to two decimal places; therefore, estimated profit may not equal the displayed revenue minus the displayed total cost exactly. For example, $185.05 - 155.71 = 29.34$, while Table~\ref{tab:results} reports an estimated profit of $29.35$ for SAC-AutoAlpha. This difference arises because profit is computed from full-precision revenue and cost before rounding, not from a formula error, and the same rounding effect applies to the other three policies in the table.
-
-A stockout week is defined as any weekly decision cycle in which at least one product category experiences non-zero unmet demand on at least one day. This is a binary weekly indicator and does not represent the magnitude of unmet demand; consequently, a high service level (fulfilled units divided by fulfilled plus stockout units, aggregated over all 52 weeks and all five products) and a high stockout-week count are not contradictory. SAC-AutoAlpha's 82.1\% service level and its 41-of-52 stockout weeks in Table~\ref{tab:service} are one such case: only a single unit of one product on one day within a week is enough for that week to be counted as a stockout week, even if the vast majority of that week's demand across all products was fulfilled.
-
-\begin{table}[h]
-\centering
-\caption{Service and floor-space utilization over 52 weeks}\label{tab:service}
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-Policy & Stockout weeks & Avg. floor use & Peak floor use \\
-\midrule
-Random       & 49/52 & 57.09\% & 97.80\% \\
-Q-learning   & 51/52 & 88.53\% & 99.20\% \\
-SARSA        & 51/52 & 92.79\% & 99.40\% \\
-SAC-AutoAlpha  & 41/52 & 93.01\% & 99.96\% \\
-\botrule
-\end{tabular}
-\end{table}
-
-\begin{figure}[h]
-\centering
-\includegraphics[width=0.92\textwidth]{figures/actor_evaluation.pdf}
-\caption{Business and service outcomes from the comparable 52-week seed-42 evaluation of Random, Q-learning, SARSA, and SAC-AutoAlpha. The upper-left panel reports total cost and revenue; the remaining panels report estimated profit, stockout units, and service level. All chart labels are in English.}\label{fig:actor-evaluation}
+\includegraphics[width=0.94\textwidth]{figures/fig_mdp_architecture.png}
+\caption{MDP architecture of the fixed-capacity inventory system. The Residual SAC-AutoAlpha controller maps the observed state to a five-product replenishment proposal; the environment enforces the 25~m$^2$ constraint at day-0 and day-3 deliveries, simulates daily demand, and returns the weekly reward and next state.}
+\label{fig:mdp}
 \end{figure}
 
-Relative to Random, SAC-AutoAlpha reduces total cost by 14.7\% (from 182.64 to 155.71 billion VND), raises revenue by 53.1\%, and changes estimated profit from a loss of 61.79 billion VND to a profit of 29.35 billion VND. Stockout units fall by 3{,}009 (59.9\%), and shortage cost falls by 67.5\%. The resulting service level is 82.1\%, based on 9{,}256 fulfilled units and 2{,}013 stockout units. The cost--revenue panel in Figure~\ref{fig:actor-evaluation} makes clear that the positive profit is driven by both lower cost and higher fulfilled-sales revenue, rather than by a cost reduction alone.
+The state is a bounded continuous vector $s_t\in\mathbb{R}^{26}$:
 
-All three learned policies outperform Random on total cost, revenue, profit, shortage cost, and stockout units. Q-learning achieves the second-lowest total cost (161.00 billion VND) and a positive estimated profit of 11.07 billion VND, while SARSA achieves 6.49 billion VND estimated profit. SAC-AutoAlpha is best on every reported business metric. It also has the fewest stockout weeks (41, versus 49 for Random and 51 for both tabular methods), although its average floor-space utilization is the highest at 93.01\%, indicating a more aggressive use of the binding capacity constraint.
+\begin{equation}
+s_t = [I_t,\widehat{D}_t,C^{\mathrm{buy}},C^{\mathrm{hold}},C^{\mathrm{short}},d_t],
+\label{eq:state}
+\end{equation}
 
-\section{Discussion}\label{sec6}
-% [AI-EDITED] New section, adapted from paper_v1.md Section 7.
+where each of the first five blocks contains one normalized value per SKU: current inventory $I_t$, seven-day demand forecast $\widehat{D}_t$, purchase cost, holding cost, and shortage penalty. The final scalar $d_t$ is the normalized time-of-year index. Thus, the model has a 26-dimensional state vector rather than 26 discrete states. The forecast is a noisy sample from the demand generator and is not the realized future demand.
 
-\textbf{Positive profit, but capacity remains binding.} All three learned policies achieve positive estimated profit, whereas Random does not. SAC-AutoAlpha provides the largest gain and sells the most units while reducing shortages. This result should nevertheless not be interpreted as eliminating the service problem. SAC-AutoAlpha still has stockouts in 41 of 52 weeks, and its average floor-space utilization is 93.01\%, with a peak of 99.96\%. The policy therefore operates close to the physical capacity boundary and has little buffer for high-demand weeks.
+The requested action $a_t\in\mathbb{R}^{5}$ specifies one continuous order quantity per SKU. It is rounded, clipped to per-SKU maximum orders, checked against the remaining area, and, if necessary, uniformly rescaled before being floored to integer units. If $f_i$ is the footprint of SKU $i$, $I_i$ its inventory before delivery, and $\widetilde{a}_i$ the clipped request, the common area scale is
 
-\textbf{Tabular versus deep RL: a comparison of unequal representations, not just algorithms.} The shared floor-space constraint makes the five products' ordering decisions interdependent, yet Q-learning and SARSA do not observe this coupling: each maintains a separate Q-table per product, conditioned only on that product's own discretized inventory bucket ($N=14$) and forecast bucket ($N=10$), and each selects its discrete order quantity independently of what the other four products are doing. SAC-AutoAlpha, in contrast, observes the full 26-dimensional joint state and selects a single 5-dimensional continuous action, so it can in principle coordinate capacity allocation across products in a way the factorized tabular agents structurally cannot. This is compounded by the equal-split reward each tabular table receives (Section~\ref{sec:algorithms}), which further obscures the cross-product coupling from the tabular baselines. Given this, SAC-AutoAlpha's advantage over Q-learning and SARSA should not be read purely as ``deep RL beats tabular RL''; part of the gap is attributable to a strictly richer state-action representation and centralized reward signal, not only to the choice of learning algorithm. The correct scoped conclusion is that SAC-AutoAlpha achieved the best performance among the four evaluated methods under the reported state discretization, action grids, reward attribution, training budget, and single demand seed -- not that SAC is universally superior to every tabular or deep RL alternative under a fair, matched representation.
+\begin{equation}
+\kappa = \min\left(1,
+\frac{25-\sum_i f_i I_i}{\sum_i f_i\widetilde{a}_i}
+\right),
+\qquad
+a_i^{\mathrm{exec}}=\left\lfloor\kappa\widetilde{a}_i\right\rfloor.
+\label{eq:capacity}
+\end{equation}
 
-\section{Limitations and Future Work}\label{sec7}
-% [AI-EDITED] New section, adapted from paper_v1.md Sections 7-8 and
-% restructured against the itemized revision requirements cross-checked
-% against the running implementation.
+Only executed units enter inventory and incur procurement cost. Because one common $\kappa$ scales the full vector, the constraint explicitly couples all SKUs.
 
-This section states precisely what would need to change for the results in Section~\ref{sec5} to support a stronger claim than ``best of four methods on one seed-42 scenario.'' Items are grouped by whether they require re-running experiments or only affect interpretation of the current results.
+\subsection{Two-Delivery Replenishment}\label{subsec:two-delivery}
 
-\subsection{Evaluation methodology}
+A representative week requires approximately 50.39~m$^2$ of goods for seven-day demand coverage, exceeding the 25~m$^2$ store capacity. The environment therefore applies the same per-delivery action twice: first on day 0 and again on day 3, after early-week sales have released floor space. Each event independently applies Eq.~\eqref{eq:capacity}. This mechanism increases weekly throughput without relaxing the physical limit or changing the actor output from five to ten dimensions.
+
+Reusing the action preserves a compact and interpretable policy: the output is the replenishment level requested on each trip. It also imposes a limitation, because the policy cannot choose different quantities for the two delivery events. A ten-dimensional extension with independently controlled deliveries is left for future work.
+
+\subsection{Accounting Profit and Training Reward}\label{subsec:reward}
+
+Accounting profit is reported independently of reward shaping:
+
+\begin{equation}
+\Pi_t = \mathrm{Revenue}_t-\mathrm{Procurement}_t-
+\mathrm{Holding}_t-\mathrm{ShortageCost}_t.
+\label{eq:profit}
+\end{equation}
+
+The learning signal is
+
+\begin{align}
+r_t = 10^{-8}\big(&\Pi_t + \lambda_m B_t
+-P_t^{\mathrm{tail}}-P_t^{\mathrm{fill}}
+-P_t^{\mathrm{excess}}\big),
+\label{eq:reward}
+\end{align}
+
+where $P_t^{\mathrm{tail}}$ penalizes aggregate shortage beyond the weekly target, $P_t^{\mathrm{fill}}$ penalizes per-SKU fill-rate gaps, and $P_t^{\mathrm{excess}}$ penalizes end inventory beyond a two-day demand target. The runtime margin-bonus weight is $\lambda_m=0$; the term is retained only as an ablation control. The shaping penalties and scale factor are optimization devices, not business expenses, and are never subtracted again from reported accounting profit.
+
+\subsection{Residual SAC-AutoAlpha}\label{subsec:residual-sac}
+
+The service baseline converts forecast and inventory into a per-delivery target:
+
+\begin{equation}
+b(s)=\operatorname{clip}\left(
+\frac{c\widehat{D}-I}{2},0,a^{\max}\right),
+\label{eq:baseline}
+\end{equation}
+
+where $c$ is the coverage factor and division by two accounts for the two delivery events. The final proposal blends this prior with the SAC actor:
+
+\begin{equation}
+a^{\mathrm{final}}(s)=(1-w)b(s)+w\pi_\theta(s).
+\label{eq:residual}
+\end{equation}
+
+The selected values are $c=1.20$ and $w=0.10$. The actor therefore remains active but makes a bounded correction around the service prior. Since Eq.~\eqref{eq:residual} is affine in the actor output, the density used by the critic target and actor loss is corrected as
+
+\begin{equation}
+\log\pi_{\mathrm{final}}(a\mid s)
+=\log\pi_{\mathrm{actor}}(a\mid s)-5\log w.
+\label{eq:jacobian}
+\end{equation}
+
+The actor accepts 26 inputs, uses two 256-unit hidden layers, and produces the mean and log standard deviation of a five-dimensional Gaussian before $\tanh$ squashing and action rescaling. Two critics accept the joint 31-dimensional state--action input, and the minimum of their estimates is used to reduce overestimation. Target critics are updated with $\tau=0.005$. The entropy temperature is learned against target entropy $-5$; actor, critic, and temperature optimizers use Adam with fixed learning rate $3\times10^{-4}$.
+
+\section{Experimental Setup}\label{sec:experiment}
+
+\subsection{Hyperparameter Selection}\label{subsec:selection}
+
+Coverage and residual weight were selected in two stages using disjoint validation pools. First, $c\in\{0.8,1.0,1.2,1.4,1.6\}$ was evaluated on seeds 6201--6205 before introducing a learned residual. A candidate was eligible only if aggregate fill rate was at least 97\% and every per-SKU fill rate cleared its warning floor. Coverage $c=1.20$ was selected as the least-inventory eligible candidate, as shown in Figure~\ref{fig:frontier}.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.90\textwidth]{figures/fig_service_inventory_frontier.png}
+\caption{Service--inventory frontier under the hard 25~m$^2$ constraint. Coverage 1.20 is the least-inventory tested setting that clears all service targets on validation seeds 6201--6205.}
+\label{fig:frontier}
+\end{figure}
+
+Second, with the trained actor frozen, $w\in\{0,0.05,0.075,0.10,0.20\}$ was evaluated on seeds 7601--7605. Only candidates that passed the complete service and inventory gate were compared by accounting profit; $w=0.10$ was selected. Figure~\ref{fig:ablation} reports this ablation. Both selected values are empirical choices from finite seed sweeps rather than theoretical constants or values imported from retail literature.
+
+\begin{figure}[ht]
+\centering
+\includegraphics[width=0.96\textwidth]{figures/fig_residual_weight_ablation.png}
+\caption{Residual-weight ablation with the actor frozen at coverage 1.20. The selected value $w=0.10$ is the profit-preferred candidate among settings that passed the joint service and inventory gate on validation seeds 7601--7605.}
+\label{fig:ablation}
+\end{figure}
+
+\subsection{Training, Selection, and Terminal Evaluation}\label{subsec:protocol}
+
+The current pipeline separates the seed roles summarized in Table~\ref{tab:seeds}. Training uses seed 7201. Every ten episodes, checkpoint candidates are evaluated on seeds 7301--7303. Promotion requires aggregate fill rate of at least 97\%, every per-SKU fill rate of at least 93\%, mean weekly shortage no greater than 30 units, and mean end-of-week inventory no greater than two demand-days. Eligible checkpoints are ranked using tail shortage and profit. The final reported rollout uses seed 42, which is not used for gradient updates or checkpoint selection.
+
+\begin{table}[ht]
+\centering
+\caption{Separation of random-seed roles in the current pipeline.}
+\label{tab:seeds}
+\begin{tabular}{@{}lll@{}}
+\toprule
+Stage & Seeds & Purpose \\
+\midrule
+Coverage validation & 6201--6205 & Select service coverage factor \\
+Residual validation & 7601--7605 & Select residual weight \\
+Training & 7201 & Perform gradient updates \\
+Checkpoint selection & 7301--7303 & Apply the release gate \\
+Terminal evaluation & 42 & Produce reported 52-week metrics \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The environment represents 365 days, which is not divisible by seven. Evaluation is therefore truncated to 52 complete weeks (364 days), avoiding a partial 53rd decision period. The terminal rollout reports aggregate and per-SKU fill rate, weekly shortage distribution, end-of-week inventory in demand-days, accounting profit, and post-delivery footprint. Monetary results are simulated VND values rather than audited observations from an operating retailer.
+
+\section{Results}\label{sec:results}
+
+Table~\ref{tab:results} reports the terminal 52-week evaluation on seed 42. The policy clears the aggregate service target with a fill rate of 97.81\%, while the lowest product-specific fill rate is 96.46\%. Mean weekly shortage is 4.75 units and the P95 is 11.30 units. Mean end-of-week inventory remains below the two-day gate at 1.60 demand-days. Every delivery respects the hard 25~m$^2$ footprint limit.
+
+\begin{table}[ht]
+\centering
+\caption{Terminal evaluation of Residual SAC-AutoAlpha over 52 complete weeks (seed 42).}
+\label{tab:results}
+\begin{tabular}{@{}lr@{}}
+\toprule
+Metric & Result \\
+\midrule
+Mean weekly shortage & 4.75 units \\
+Total 52-week shortage & 247 units \\
+P95 weekly shortage & 11.30 units \\
+Maximum weekly shortage & 121 units \\
+Weeks exceeding 30-unit shortage target & 2/52 \\
+Aggregate fill rate & 97.81\% \\
+Lowest per-SKU fill rate & 96.46\% \\
+Mean end-of-week inventory & 1.60 demand-days \\
+52-week accounting profit & 72.216 billion VND \\
+Peak footprint after a delivery & $<25$~m$^2$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The distributional metrics qualify the favorable averages. Two weeks exceed the 30-unit shortage threshold and the maximum weekly shortage reaches 121 units. Thus, the reported mean and P95 targets are met, but the policy does not guarantee that every week clears the operational threshold. The 72.216 billion VND profit is accounting profit from Eq.~\eqref{eq:profit}; it excludes the artificial shaping penalties in Eq.~\eqref{eq:reward}.
+
+\section{Discussion}\label{sec:discussion}
+
+The results indicate that the combined design reaches a useful operating point in the held-out scenario: high aggregate and per-product service, low typical shortage, less than two days of end inventory, positive accounting profit, and strict capacity compliance. These outcomes should be attributed to the complete design rather than to the learned residual alone. Two deliveries resolve the single-trip throughput mismatch, the baseline provides most of the service-oriented action, and SAC adjusts the joint proposal within the remaining 10\% residual weight.
+
+The residual construction also changes the interpretation of learning performance. The policy is neither a fixed base-stock rule nor vanilla SAC. A residual weight of 0.10 means the hand-designed prior materially constrains the operating region, while the actor still changes every proposal and is trained with twin critics and entropy regularization. The residual-weight ablation establishes the selected operating point within the tested grid, but it does not isolate all possible interactions between architecture, training duration, and the service prior.
+
+Tail behavior remains operationally important. Although P95 shortage is 11.30 units, the maximum is 121 units. In extreme weeks, demand can exceed the quantity that two deliveries can physically move through 25~m$^2$. Reporting only the mean would hide this risk. A practical deployment would require monitoring, exception handling, or an additional logistics option for peak periods.
+
+\section{Limitations and Future Work}\label{sec:limitations}
+
+The evaluation has the following limitations:
 
 \begin{itemize}
-    \item \textbf{Single seed, no variance estimate.} All results come from one fixed training/evaluation seed (42) and one 52-week demand realization; no standard deviation, confidence interval, or statistical test (e.g., paired $t$-test or Wilcoxon signed-rank test) supports the ranking in Table~\ref{tab:results}. The minimum recommended protocol is 5 training seeds evaluated on 10 held-out demand seeds each, reporting mean $\pm$ standard deviation and a 95\% confidence interval per policy.
-    \item \textbf{Validation/test seed conflation (confirmed, Section~\ref{subsec:protocol}).} Checkpoint selection during training and final reporting currently use the same seed. Training, validation, and test seeds must be drawn from disjoint pools (e.g., training seeds 0--4, validation seeds 100--104, test seeds 200--209) before the comparison can be treated as free of selection leakage.
-    \item \textbf{Fair runtime comparison not reported.} Training time and inference (52-week rollout) time were not measured and archived for any of the four policies in this study. These are different quantities that should not be conflated (e.g., SAC training time versus SAC checkpoint-loading-plus-inference time), and both should be reported per policy in any future revision.
+    \item \textbf{Single terminal scenario.} Seed roles are separated, but headline metrics are produced by one terminal seed. They provide no multi-seed variance, confidence interval, or statistical guarantee.
+    \item \textbf{One action reused twice.} The same five-dimensional vector is executed on days 0 and 3. A ten-dimensional policy could condition the two deliveries independently, at the cost of a larger action space and additional training burden.
+    \item \textbf{Empirical control constants.} Coverage 1.20 and residual weight 0.10 are selected from five-seed grids. They are not analytical optima and may not transfer unchanged to another store or demand distribution.
+    \item \textbf{No pure-policy attribution.} Because the deployed policy is a 90/10 blend, the results cannot be presented as the achievement of an unconstrained SAC actor. Future experiments should compare the residual design with a tuned rule-based policy and matched vanilla continuous-control baselines.
+    \item \textbf{Noisy forecast.} The seven-day forecast and realized demand are distinct samples from the same stochastic generator. The forecast is informative but is not ground truth.
+    \item \textbf{Economic-input provenance.} Purchase costs, carrying-cost rates, and shortage penalties include market benchmarks and modeling assumptions rather than audited invoices. Profit should therefore be interpreted as simulated scenario profit.
+    \item \textbf{Residual tail risk.} Two of 52 weeks exceed the shortage target. The design optimizes a service--inventory--profit compromise under a hard constraint; it does not eliminate stockout and excess-inventory risk simultaneously.
 \end{itemize}
 
-\subsection{Missing ablations and baselines}
+Future work should repeat terminal evaluation over a locked multi-seed test pool, report uncertainty intervals, evaluate independent day-0 and day-3 actions, and test additional logistics capacity for extreme demand weeks. These extensions should preserve the separation between validation seeds and terminal reporting.
 
-\begin{itemize}
-    \item \textbf{No fixed-alpha ablation for SAC-AutoAlpha.} The only entropy-temperature setting evaluated is automatic tuning against $\mathcal{H}_{\text{target}} = -5$. Whether automatic tuning outperforms a well-chosen fixed $\alpha$ (e.g., $\alpha \in \{0.05, 0.1, 0.2, 0.5\}$) has not been tested, so the paper cannot currently claim that adaptive temperature tuning itself is responsible for SAC-AutoAlpha's advantage over the tabular baselines.
-    \item \textbf{No classical inventory-management baseline.} Random is a weak reference; it does not show that RL is preferable to a reasonable non-learned policy. A forecast base-stock rule ($\text{order}_i = \max(0, \text{forecast}_i + \text{safety stock}_i - \text{inventory}_i)$) or an $(s,S)$ policy, tuned on validation seeds only, is a required comparison point.
-    \item \textbf{No continuous-control RL baseline in SAC's own class.} TD3 is a natural comparison (continuous action, off-policy, twin critics, no entropy term), since it isolates the effect of entropy regularization from the effect of moving from tabular to deep, continuous-action RL. DDPG and PPO are additional candidates.
-    \item \textbf{No state-space ablation.} Of the 26 state dimensions, 15 (purchase cost, storage cost, shortage penalty; 5 each) are static within an episode. Whether these static cost features measurably help learning, relative to a 12-dimensional dynamic-only state (inventory, forecast, day, floor-utilization ratio), has not been tested.
-\end{itemize}
+\section{Conclusion}\label{sec:conclusion}
 
-\subsection{State and reward design}
-
-\begin{itemize}
-    \item \textbf{Equal-split reward attribution for tabular baselines (confirmed, Section~\ref{sec:algorithms}).} Q-learning and SARSA train every per-product table on the same $r/5$ signal, which cannot separate one product's decision quality from the shared floor-space cost imposed by the other four. A per-product reward decomposition with an explicit shared capacity penalty term is the recommended fix.
-    \item \textbf{Requested-versus-executed action instrumentation gap (confirmed, Section~\ref{subsec:floor}).} The environment does not currently expose the pre-scaling requested action or the capacity scale factor separately from the executed, post-scaling order. Adding \texttt{requested\_action}, \texttt{executed\_action}, and \texttt{capacity\_scale} to the step output, and auditing that the replay buffer stores the executed action, is required to fully rule out a state-action-reward mismatch in SAC-AutoAlpha's off-policy training.
-    \item \textbf{No explicit floor-utilization state feature.} The 26-dimensional state (Eq.~\ref{eq:state}) has no direct \emph{remaining floor space} scalar; because each product's footprint is fixed, the policy can in principle infer floor usage from the inventory sub-vector, but this has not been verified empirically. Adding an $\text{occupied\_area\_ratio}$ scalar (state dimension 26 $\to$ 27) is a low-cost experiment to test whether an explicit representation improves capacity-aware ordering.
-\end{itemize}
-
-\subsection{Reproducibility}
-
-\begin{itemize}
-    \item \textbf{Training artifacts not archived.} The checkpoint-specific training command, full training log, config snapshot, checkpoint hash, software versions, and hardware were not preserved alongside the actor checkpoint used to produce Section~\ref{sec5}'s results. Code-level defaults are documented in Section~\ref{subsec:reproducibility}, but exact re-training of the reported checkpoint is not currently possible from the archived artifacts alone. Future runs should be saved under a per-experiment directory containing the command, environment description, training log, metrics, checkpoints, and a SHA-256 hash of each checkpoint.
-    \item \textbf{No learning curves.} Evaluation profit, episode return, learned $\alpha$, and policy entropy versus training episode are not plotted for any policy; without them, convergence speed and training stability cannot be assessed or compared across policies.
-\end{itemize}
-
-\subsection{Modeling scope}
-
-The environment models zero lead time (orders are received in the same week they are placed) and a single retail echelon with no intermediate warehouse; extending the model to include lead time and an upstream warehouse echelon would enable closer comparison with multi-echelon studies such as~\cite{bib1}. Most importantly, SAC-AutoAlpha still operates at 93.01\% average floor utilization and has shortages in 41 of 52 weeks under the single evaluated scenario. Future work should investigate additional storage capacity, demand forecasting, or service-level-aware rewards to create a buffer for peak weeks, and should do so under the multi-seed, ablation, and baseline protocol above, rather than treating the current single-scenario positive-profit result as a final solution.
-
-\section{Conclusion}\label{sec8}
-% [AI-EDITED] New section, adapted from paper_v1.md Section 8.
-
-This paper presented a weekly, floor-space-constrained retail inventory MDP for a five-category Apple store and compared Random, Q-learning, SARSA, and SAC-AutoAlpha over 52 weeks with seed 42. All learned policies improve on Random, while SAC-AutoAlpha achieves the lowest total cost (155.71 billion VND), highest revenue (185.05 billion VND), highest estimated profit (29.35 billion VND), and fewest stockout units (2{,}013). These gains are accompanied by high capacity use: average floor-space utilization is 93.01\%, peak use is 99.96\%, and stockouts still occur in 41 of 52 weeks. The appropriate conclusion is therefore that SAC-AutoAlpha is the best policy among the four evaluated methods for this configured scenario, while the physical capacity constraint remains a central operational limitation. Future work should use repeated seeds, controlled training ablations, and capacity or forecasting interventions to test whether service can improve without losing the economic gains.
+This paper presented a fixed-capacity retail replenishment system combining a structural two-delivery schedule with Residual SAC-AutoAlpha. The two delivery events address a physical mismatch between approximately 50.39~m$^2$ of representative weekly coverage and the 25~m$^2$ store limit, while the residual policy adjusts a service-oriented baseline using a joint continuous actor. In the held-out 52-week seed-42 scenario, the system achieves a 97.81\% aggregate fill rate, a 96.46\% minimum per-SKU fill rate, 4.75 mean weekly shortage units, 11.30 P95 shortage units, 1.60 demand-days of end inventory, and 72.216 billion VND accounting profit without violating the area constraint. Because two weeks still exceed the shortage threshold and the terminal evidence comes from one seed, the appropriate conclusion is that the method reaches a service-feasible operating point in the reported scenario, not that it removes tail risk or guarantees seed-robust performance.
 
 \backmatter
 
-% [AI-EDITED] Declarations filled in with reasonable defaults for a
-% synthetic-simulation student project (no funding, no COI, no human
-% subjects). Funding, code-availability, and author-contribution statements
-% are placeholders pending author confirmation before submission.
-
 \bibliography{sn-bibliography}
-% common bib file
 
 \end{document}
